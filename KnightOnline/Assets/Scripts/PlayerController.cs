@@ -314,20 +314,20 @@ namespace KnightOnline
                 characterController.Move(moveDirection * Time.deltaTime);
                 
                 UpdateState(isRunning ? PlayerState.Running : PlayerState.Walking);
-                animator.SetFloat("Speed", currentSpeed);
+                if (HasAnimator()) animator.SetFloat("Speed", currentSpeed);
             }
             else
             {
                 characterController.Move(Vector3.zero);
                 UpdateState(PlayerState.Idle);
-                animator.SetFloat("Speed", 0);
+                if (HasAnimator()) animator.SetFloat("Speed", 0);
             }
             
             // Jump
             if (Input.GetButtonDown("Jump") && isGrounded)
             {
                 verticalVelocity = jumpForce;
-                animator.SetTrigger("Jump");
+                if (HasAnimator()) animator.SetTrigger("Jump");
             }
             
             verticalVelocity += gravity * Time.deltaTime;
@@ -366,7 +366,12 @@ namespace KnightOnline
                 isRunning = false;
             }
             
-            animator.SetBool("IsRunning", isRunning);
+            if (HasAnimator()) animator.SetBool("IsRunning", isRunning);
+        }
+        
+        bool HasAnimator()
+        {
+            return animator != null && animator.runtimeAnimatorController != null;
         }
         
         void HandleLockOn()
@@ -434,7 +439,7 @@ namespace KnightOnline
         System.Collections.IEnumerator PerformAttack()
         {
             UpdateState(PlayerState.Attacking);
-            animator.SetTrigger("Attack");
+            if (HasAnimator()) animator.SetTrigger("Attack");
             lastAttackTime = Time.time;
             
             yield return new WaitForSeconds(0.2f);
@@ -519,7 +524,7 @@ namespace KnightOnline
             if (currentState != newState)
             {
                 currentState = newState;
-                animator.SetInteger("State", (int)newState);
+                if (HasAnimator()) animator.SetInteger("State", (int)newState);
             }
         }
         
@@ -531,7 +536,7 @@ namespace KnightOnline
             currentHealth -= reducedDamage;
             currentHealth = Mathf.Max(0, currentHealth);
             
-            animator.SetTrigger("Hurt");
+            if (HasAnimator()) animator.SetTrigger("Hurt");
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
             
             if (currentHealth <= 0)
@@ -570,7 +575,7 @@ namespace KnightOnline
         {
             isDead = true;
             UpdateState(PlayerState.Dead);
-            animator.SetTrigger("Death");
+            if (HasAnimator()) animator.SetTrigger("Death");
             OnDeath?.Invoke();
             
             // Respawn after 5 seconds
