@@ -175,6 +175,47 @@ namespace KnightOnline
             Material groundMat = new Material(Shader.Find("Standard"));
             groundMat.color = new Color(0.3f, 0.5f, 0.2f);
             ground.GetComponent<Renderer>().material = groundMat;
+            
+            // NavMesh Agent bileşeni ile yüzey oluştur (NavMesh bake edilebilir)
+            GameObject navMeshSurface = new GameObject("NavMeshSurface");
+            UnityEngine.AI.NavMeshSurface surface = navMeshSurface.AddComponent<UnityEngine.AI.NavMeshSurface>();
+            surface.BuildNavMesh();
+            
+            // Enemy layer oluştur (yoksa)
+            CreateEnemyLayer();
+        }
+        
+        void CreateEnemyLayer()
+        {
+            // 8. katmanı "Enemy" olarak ayarla
+            SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            SerializedProperty layers = tagManager.FindProperty("layers");
+            
+            if (layers != null)
+            {
+                bool found = false;
+                for (int i = 8; i < layers.arraySize; i++)
+                {
+                    SerializedProperty layerProp = layers.GetArrayElementAtIndex(i);
+                    if (layerProp.stringValue == "Enemy")
+                    {
+                        found = true;
+                        break;
+                    }
+                    if (string.IsNullOrEmpty(layerProp.stringValue))
+                    {
+                        layerProp.stringValue = "Enemy";
+                        tagManager.ApplyModifiedProperties();
+                        Debug.Log("✅ Enemy layer (katman " + i + ") oluşturuldu!");
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    Debug.LogWarning("⚠️ Enemy layer için boş katman bulunamadı!");
+                }
+            }
         }
         
         void SetupPlayer()

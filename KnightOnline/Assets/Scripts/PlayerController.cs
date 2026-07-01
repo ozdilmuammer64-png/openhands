@@ -115,6 +115,13 @@ namespace KnightOnline
                 characterController = gameObject.AddComponent<CharacterController>();
             }
             
+            // Düşman katmanını ayarla
+            enemyLayer = LayerMask.GetMask("Enemy");
+            if (enemyLayer.value == 0)
+            {
+                Debug.LogWarning("⚠️ Enemy layer bulunamadı! Lütfen 'Tools > Knight Online > Setup Game' çalıştırın.");
+            }
+            
             SetupClassStats();
             SetupAnimator();
             CreateHealthBar();
@@ -391,17 +398,36 @@ namespace KnightOnline
         
         void LockNearestEnemy()
         {
-            Collider[] enemies = Physics.OverlapSphere(transform.position, 15f, enemyLayer);
             float closestDistance = Mathf.Infinity;
             Transform closest = null;
             
-            foreach (Collider enemy in enemies)
+            // Enemy layer kontrolü
+            if (enemyLayer.value != 0)
             {
-                float distance = Vector3.Distance(transform.position, enemy.transform.position);
-                if (distance < closestDistance)
+                Collider[] enemies = Physics.OverlapSphere(transform.position, 15f, enemyLayer);
+                foreach (Collider enemy in enemies)
                 {
-                    closestDistance = distance;
-                    closest = enemy.transform;
+                    float distance = Vector3.Distance(transform.position, enemy.transform.position);
+                    if (distance < closestDistance)
+                    {
+                        closestDistance = distance;
+                        closest = enemy.transform;
+                    }
+                }
+            }
+            else
+            {
+                // Layer yoksa tüm MonsterController'ları bul
+                MonsterController[] monsters = FindObjectsOfType<MonsterController>();
+                foreach (MonsterController monster in monsters)
+                {
+                    if (monster == null || monster.IsDead) continue;
+                    float distance = Vector3.Distance(transform.position, monster.transform.position);
+                    if (distance < closestDistance && distance <= 15f)
+                    {
+                        closestDistance = distance;
+                        closest = monster.transform;
+                    }
                 }
             }
             
@@ -448,10 +474,30 @@ namespace KnightOnline
             Transform target = lockedTarget;
             if (target == null)
             {
-                Collider[] hits = Physics.OverlapSphere(transform.position, attackRange, enemyLayer);
-                if (hits.Length > 0)
+                // Layer ile kontrol et
+                if (enemyLayer.value != 0)
                 {
-                    target = hits[0].transform;
+                    Collider[] hits = Physics.OverlapSphere(transform.position, attackRange, enemyLayer);
+                    if (hits.Length > 0)
+                    {
+                        target = hits[0].transform;
+                    }
+                }
+                else
+                {
+                    // Layer yoksa en yakın canavarı bul
+                    MonsterController[] monsters = FindObjectsOfType<MonsterController>();
+                    float closestDist = attackRange;
+                    foreach (MonsterController monster in monsters)
+                    {
+                        if (monster == null || monster.IsDead) continue;
+                        float dist = Vector3.Distance(transform.position, monster.transform.position);
+                        if (dist < closestDist)
+                        {
+                            closestDist = dist;
+                            target = monster.transform;
+                        }
+                    }
                 }
             }
             
