@@ -10,11 +10,6 @@ namespace KnightOnline
         [Header("Skills")]
         public List<Skill> skills = new List<Skill>();
         
-        [Header("Mana")]
-        public int maxMana = 100;
-        public int currentMana = 100;
-        public float manaRegenRate = 10f;
-        
         void Awake()
         {
             if (Instance == null) Instance = this;
@@ -26,11 +21,60 @@ namespace KnightOnline
             SetupDefaultSkills();
         }
         
+        void SetupDefaultSkills()
+        {
+            skills.Clear();
+            
+            // 1 - Güçlü Vuruş
+            skills.Add(new Skill {
+                name = "Power Strike",
+                damage = 30,
+                manaCost = 10,
+                cooldown = 1f,
+                description = "Güçlü bir saldırı"
+            });
+            
+            // 2 - Ateş Topu
+            skills.Add(new Skill {
+                name = "Fireball",
+                damage = 50,
+                manaCost = 20,
+                cooldown = 2f,
+                description = "Ateş topu fırlat"
+            });
+            
+            // 3 - Şifa
+            skills.Add(new Skill {
+                name = "Heal",
+                healAmount = 40,
+                manaCost = 15,
+                cooldown = 5f,
+                description = "Kendini iyileştir"
+            });
+            
+            // 4 - Şimşek
+            skills.Add(new Skill {
+                name = "Lightning",
+                damage = 80,
+                manaCost = 25,
+                cooldown = 3f,
+                description = "Yıldırım çarpması"
+            });
+            
+            // 5 - Buz
+            skills.Add(new Skill {
+                name = "Frost",
+                damage = 25,
+                manaCost = 15,
+                cooldown = 2f,
+                description = "Buz saldırısı"
+            });
+            
+            Debug.Log($"✅ {skills.Count} yetenek yüklendi!");
+        }
+        
         void Update()
         {
-            // Mana yenile
-            currentMana = Mathf.Min(currentMana + manaRegenRate * Time.deltaTime, maxMana);
-            
             // Cooldown güncelle
             foreach (Skill s in skills)
             {
@@ -38,51 +82,44 @@ namespace KnightOnline
                     s.currentCooldown -= Time.deltaTime;
             }
             
-            // Tuş kontrolü (1-5)
-            if (Input.GetKeyDown(KeyCode.Alpha1)) CastSkill(0);
-            if (Input.GetKeyDown(KeyCode.Alpha2)) CastSkill(1);
-            if (Input.GetKeyDown(KeyCode.Alpha3)) CastSkill(2);
-            if (Input.GetKeyDown(KeyCode.Alpha4)) CastSkill(3);
-            if (Input.GetKeyDown(KeyCode.Alpha5)) CastSkill(4);
+            // Tuş kontrolü
+            if (Input.GetKeyDown(KeyCode.Alpha1)) UseSkill(0);
+            if (Input.GetKeyDown(KeyCode.Alpha2)) UseSkill(1);
+            if (Input.GetKeyDown(KeyCode.Alpha3)) UseSkill(2);
+            if (Input.GetKeyDown(KeyCode.Alpha4)) UseSkill(3);
+            if (Input.GetKeyDown(KeyCode.Alpha5)) UseSkill(4);
         }
         
-        void SetupDefaultSkills()
-        {
-            skills.Clear();
-            
-            skills.Add(new Skill { name = "Power Strike", damage = 30, manaCost = 10, cooldown = 1f });
-            skills.Add(new Skill { name = "Fireball", damage = 50, manaCost = 20, cooldown = 2f });
-            skills.Add(new Skill { name = "Heal", healAmount = 40, manaCost = 15, cooldown = 5f });
-            skills.Add(new Skill { name = "Smite", damage = 80, manaCost = 25, cooldown = 3f });
-            skills.Add(new Skill { name = "Frost", damage = 25, manaCost = 15, cooldown = 2f });
-            
-            Debug.Log($"✅ {skills.Count} yetenek yüklendi!");
-        }
-        
-        void CastSkill(int index)
+        public void UseSkill(int index)
         {
             if (index >= skills.Count) return;
             
             Skill skill = skills[index];
             
+            // Cooldown kontrolü
             if (skill.currentCooldown > 0)
             {
-                Debug.Log($"⏳ {skill.name} bekliyor!");
+                Debug.Log($"⏳ {skill.name} bekliyor ({skill.currentCooldown:F1}s)");
                 return;
             }
             
-            if (currentMana < skill.manaCost)
+            // Mana kontrolü
+            PlayerController player = GetComponent<PlayerController>();
+            if (player == null) return;
+            
+            if (player.currentMana < skill.manaCost)
             {
-                Debug.Log($"❌ Mana yok! ({currentMana}/{skill.manaCost})");
+                Debug.Log($"❌ Mana yok! (Gerekli: {skill.manaCost}, Mevcut: {player.currentMana})");
                 return;
             }
             
-            currentMana -= (int)skill.manaCost;
+            // Mana harca
+            player.UseMana((int)skill.manaCost);
             skill.currentCooldown = skill.cooldown;
             
             Debug.Log($"🔥 {skill.name}!");
             
-            // Hasar ver
+            // Hasar yeteneği
             if (skill.damage > 0)
             {
                 Transform target = FindNearestEnemy();
@@ -91,21 +128,17 @@ namespace KnightOnline
                     IDamageable dmg = target.GetComponent<IDamageable>();
                     if (dmg != null)
                     {
-                        dmg.TakeDamage(skill.damage, false);
+                        dmg.TakeDamage(skill.damage);
                         Debug.Log($"💥 {target.name} -> {skill.damage} hasar!");
                     }
                 }
             }
             
-            // Şifa ver
+            // Şifa yeteneği
             if (skill.healAmount > 0)
             {
-                PlayerController pc = GetComponent<PlayerController>();
-                if (pc != null)
-                {
-                    pc.Heal((int)skill.healAmount);
-                    Debug.Log($"💚 +{skill.healAmount} can!");
-                }
+                player.Heal((int)skill.healAmount);
+                Debug.Log($"💚 +{skill.healAmount} can!");
             }
         }
         
@@ -118,7 +151,7 @@ namespace KnightOnline
             foreach (MonsterController m in monsters)
             {
                 if (m == null) continue;
-                float d = Vector3.Distance(transform.position, m.transform.position);
+                float d = Vector2.Distance(transform.position, m.transform.position);
                 if (d < closest && d <= 15f)
                 {
                     closest = d;
@@ -127,15 +160,23 @@ namespace KnightOnline
             }
             return result;
         }
+        
+        public Skill GetSkill(int index)
+        {
+            if (index >= 0 && index < skills.Count)
+                return skills[index];
+            return null;
+        }
     }
     
     [System.Serializable]
     public class Skill
     {
         public string name = "Skill";
+        public string description = "";
         public int damage = 0;
-        public float healAmount = 0;
-        public float manaCost = 10;
+        public int healAmount = 0;
+        public int manaCost = 10;
         public float cooldown = 1f;
         [HideInInspector] public float currentCooldown = 0;
     }

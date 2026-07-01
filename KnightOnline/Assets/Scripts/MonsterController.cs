@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace KnightOnline
 {
@@ -11,49 +10,47 @@ namespace KnightOnline
         public int currentHealth = 100;
         public int attackDamage = 10;
         
-        [Header("Settings")]
+        [Header("Movement")]
         public float moveSpeed = 2f;
-        public float attackRange = 2f;
-        public float sightRange = 10f;
+        public float sightRange = 5f;
+        public float attackRange = 1f;
         public float attackCooldown = 1f;
         
         [Header("Patrol")]
         public bool canPatrol = true;
-        public float patrolRadius = 5f;
+        public float patrolRadius = 3f;
+        public float patrolWaitTime = 2f;
         
         // Events
         public System.Action<int, int> OnHealthChanged;
         public System.Action OnDeath;
         
-        private NavMeshAgent navAgent;
-        private Transform player;
-        private float lastAttackTime = 0;
-        private Vector3 spawnPoint;
-        private bool isDead = false;
+        Transform player;
+        Rigidbody2D rb;
+        Vector2 spawnPoint;
+        bool isDead = false;
+        bool facingRight = true;
+        float lastAttackTime = 0;
+        float patrolTimer = 0;
+        Vector2 patrolTarget;
+        
+        void Awake()
+        {
+            rb = GetComponent<Rigidbody2D>();
+            if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0;
+            rb.freezeRotation = true;
+        }
         
         void Start()
         {
-            navAgent = GetComponent<NavMeshAgent>();
-            if (navAgent == null)
-                navAgent = gameObject.AddComponent<NavMeshAgent>();
-            
-            navAgent.speed = moveSpeed;
-            navAgent.stoppingDistance = attackRange;
-            
-            player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            currentHealth = maxHealth;
             spawnPoint = transform.position;
             
-            // NavMesh kontrolü
-            if (!navAgent.isOnNavMesh)
-            {
-                Debug.LogWarning($"⚠️ {monsterName} NavMesh üzerinde değil! NavMesh bake edilmeli.");
-            }
+            GameObject p = GameObject.FindGameObjectWithTag("Player");
+            if (p != null) player = p.transform;
             
-            // Rastgele patrol başlat
-            if (canPatrol)
-            {
-                InvokeRepeating(nameof(Patrol), 2f, 5f);
-            }
+            if (canPatrol) SetNewPatrolTarget();
         }
         
         void Update()
@@ -62,88 +59,95 @@ namespace KnightOnline
             
             if (player != null)
             {
-                float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+                float dist = Vector2.Distance(transform.position, player.position);
                 
-                // Oyuncu görüş alanında mı?
-                if (distanceToPlayer <= sightRange)
+                if (dist <= sightRange)
                 {
+                    // Oyuncuyu takip et
+                    ChasePlayer();
+                    
                     // Saldırı menzilinde mi?
-                    if (distanceToPlayer <= attackRange)
+                    if (dist <= attackRange)
                     {
                         Attack();
-                    }
-                    else
-                    {
-                        ChasePlayer();
                     }
                 }
                 else
                 {
-                    // Oyuncuyu kaybetti, idle
-                    StopChase();
+                    // Devriye gez
+                    Patrol();
                 }
+            }
+            else
+            {
+                Patrol();
             }
         }
         
         void ChasePlayer()
         {
-            if (navAgent != null && navAgent.isOnNavMesh)
-            {
-                navAgent.SetDestination(player.position);
-                navAgent.stoppingDistance = attackRange;
-                
-                // Yöne döndür
-                Vector3 dir = player.position - transform.position;
-                dir.y = 0;
-                if (dir.magnitude > 0.1f)
-                    transform.rotation = Quaternion.LookRotation(dir);
-            }
-        }
-        
-        void StopChase()
-        {
-            if (navAgent != null)
-            {
-                navAgent.ResetPath();
-            }
+            Vector2 dir = (player.position - transform.position).normalized;
+            rb.velocity = dir * moveSpeed;
+            
+            // Yöne döndür
+            if (dir.x > 0.1f && !facingRight) Flip();
+            else if (dir.x < -0.1f && facingRight) Flip();
         }
         
         void Patrol()
         {
-            if (isDead) return;
-            if (player != null && Vector3.Distance(transform.position, player.position) <= sightRange) return;
+            patrolTimer -= Time.deltaTime;
             
-            if (navAgent != null && navAgent.isOnNavMesh && canPatrol)
+            if (patrolTimer <= 0)
             {
-                Vector3 randomPoint = spawnPoint + Random.insideUnitSphere * patrolRadius;
-                NavMeshHit hit;
-                if (NavMesh.SamplePosition(randomPoint, out hit, 2f, NavMesh.AllAreas))
+                // Hedefe git
+                Vector2 dir = (patrolTarget - (Vector2)transform.position).normalized;
+                rb.velocity = dir * moveSpeed * 0.5f;
+                
+                // Yöne döndür
+                if (dir.x > 0.1f && !facingRight) Flip();
+                else if (dir.x < -0.1f && facingRight) Flip();
+                
+                // Hedefe vardı mı?
+                if (Vector2.Distance(transform.position, patrolTarget) < 0.5f)
                 {
-                    navAgent.SetDestination(hit.position);
+                    SetNewPatrolTarget();
                 }
             }
         }
         
+        void SetNewPatrolTarget()
+        {
+            patrolTarget = spawnPoint + (Vector2)Random.insideUnitCircle * patrolRadius;
+            patrolTimer = patrolWaitTime;
+        }
+        
         void Attack()
         {
+            rb.velocity = Vector2.zero;
+            
             if (Time.time - lastAttackTime >= attackCooldown)
             {
                 lastAttackTime = Time.time;
                 
-                // Oyuncuya hasar ver
-                IDamageable damageable = player.GetComponent<IDamageable>();
-                if (damageable != null)
+                IDamageable dmg = player.GetComponent<IDamageable>();
+                if (dmg != null)
                 {
-                    damageable.TakeDamage(attackDamage, false);
-                    Debug.Log($"💀 {monsterName}, oyuncuya {attackDamage} hasar verdi!");
+                    dmg.TakeDamage(attackDamage);
+                    Debug.Log($"💀 {monsterName} saldırdı! {attackDamage} hasar");
                 }
-                
-                // Yöne döndür
-                Vector3 dir = player.position - transform.position;
-                dir.y = 0;
-                if (dir.magnitude > 0.1f)
-                    transform.rotation = Quaternion.LookRotation(dir);
             }
+        }
+        
+        void Flip()
+        {
+            facingRight = !facingRight;
+            transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, 1);
+        }
+        
+        public void TakeDamage(int damage)
+        {
+            TakeDamage(damage, false);
         }
         
         public void TakeDamage(int damage, bool isCritical)
@@ -155,13 +159,13 @@ namespace KnightOnline
             
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
             
-            string critText = isCritical ? " KRITIK!" : "";
-            Debug.Log($"💥 {monsterName} {damage} hasar yedi!{critText} (Can: {currentHealth}/{maxHealth})");
+            string crit = isCritical ? " KRITIK!" : "";
+            Debug.Log($"💥 {monsterName} hasar aldı! {damage}{crit} (Can: {currentHealth}/{maxHealth})");
             
-            if (currentHealth <= 0)
-            {
-                Die();
-            }
+            // Hasar efekti
+            StartCoroutine(DamageEffect());
+            
+            if (currentHealth <= 0) Die();
         }
         
         public void TakeDamage(float damage)
@@ -169,15 +173,28 @@ namespace KnightOnline
             TakeDamage((int)damage, false);
         }
         
+        System.Collections.IEnumerator DamageEffect()
+        {
+            SpriteRenderer sr = GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                Color original = sr.color;
+                sr.color = Color.red;
+                yield return new WaitForSeconds(0.1f);
+                sr.color = original;
+            }
+        }
+        
         void Die()
         {
             if (isDead) return;
             isDead = true;
             
+            rb.velocity = Vector2.zero;
             Debug.Log($"☠️ {monsterName} öldü!");
             OnDeath?.Invoke();
             
-            // Yeniden doğ
+            // 3 saniye sonra yeniden doğ
             Invoke(nameof(Respawn), 3f);
         }
         
@@ -186,7 +203,7 @@ namespace KnightOnline
             currentHealth = maxHealth;
             isDead = false;
             transform.position = spawnPoint;
-            transform.position += Vector3.up; // Yerden biraz yukarı
+            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, 1);
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
             Debug.Log($"🔄 {monsterName} yeniden doğdu!");
         }

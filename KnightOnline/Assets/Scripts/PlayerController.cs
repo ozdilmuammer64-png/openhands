@@ -1,148 +1,195 @@
 using UnityEngine;
-using KnightOnline;
 
-public class PlayerController : MonoBehaviour, IDamageable
+namespace KnightOnline
 {
-    [Header("Stats")]
-    public int maxHealth = 100;
-    public int currentHealth = 100;
-    public int attackDamage = 20;
-    public float moveSpeed = 5f;
-    
-    [Header("Components")]
-    CharacterController cc;
-    CameraController camController;
-    
-    [Header("Settings")]
-    public float attackRange = 2.5f;
-    public float attackCooldown = 0.5f;
-    
-    // Events
-    public System.Action<int, int> OnHealthChanged;
-    public System.Action OnDeath;
-    
-    float lastAttackTime = 0;
-    Vector3 moveDirection;
-    
-    void Start()
+    public class PlayerController : MonoBehaviour, IDamageable
     {
-        cc = GetComponent<CharacterController>();
-        if (cc == null) cc = gameObject.AddComponent<CharacterController>();
+        [Header("Stats")]
+        public int maxHealth = 100;
+        public int currentHealth = 100;
+        public int attackDamage = 20;
+        public float moveSpeed = 5f;
         
-        // Kamerayı bul ve ayarla
-        Camera cam = Camera.main;
-        if (cam != null)
+        [Header("Mana")]
+        public int maxMana = 100;
+        public int currentMana = 100;
+        public float manaRegenRate = 5f;
+        
+        [Header("Combat")]
+        public float attackRange = 1.5f;
+        public float attackCooldown = 0.3f;
+        
+        // Events
+        public System.Action<int, int> OnHealthChanged;
+        public System.Action<int, int> OnManaChanged;
+        public System.Action OnDeath;
+        
+        Rigidbody2D rb;
+        Vector2 moveDirection;
+        float lastAttackTime = 0;
+        float lastManaRegenTime = 0;
+        bool facingRight = true;
+        
+        void Awake()
         {
-            camController = cam.GetComponent<CameraController>();
-            if (camController != null)
-            {
-                camController.target = transform;
-            }
+            rb = GetComponent<Rigidbody2D>();
+            if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0;
+            rb.freezeRotation = true;
         }
         
-        Debug.Log("✅ Oyuncu hazır!");
-    }
-    
-    void Update()
-    {
-        HandleMovement();
-        HandleAttack();
-    }
-    
-    void HandleMovement()
-    {
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
-        Vector3 dir = new Vector3(h, 0, v).normalized;
-        
-        if (dir.magnitude >= 0.1f)
+        void Start()
         {
-            Camera cam = Camera.main;
-            if (cam != null)
-            {
-                Vector3 forward = cam.transform.forward;
-                Vector3 right = cam.transform.right;
-                forward.y = 0; right.y = 0;
-                forward.Normalize(); right.Normalize();
-                moveDirection = (forward * v + right * h) * moveSpeed;
-            }
-            else
-            {
-                moveDirection = dir * moveSpeed;
-            }
+            currentHealth = maxHealth;
+            currentMana = maxMana;
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+            OnManaChanged?.Invoke(currentMana, maxMana);
+        }
+        
+        void Update()
+        {
+            HandleMovement();
+            HandleAttack();
+            HandleManaRegen();
+            HandleSkills();
+        }
+        
+        void HandleMovement()
+        {
+            float h = Input.GetAxisRaw("Horizontal");
+            float v = Input.GetAxisRaw("Vertical");
             
-            transform.rotation = Quaternion.LookRotation(moveDirection);
-        }
-        else
-        {
-            moveDirection = Vector3.zero;
+            moveDirection = new Vector2(h, v).normalized;
+            rb.velocity = moveDirection * moveSpeed;
+            
+            // Yöne göre döndür
+            if (h > 0 && !facingRight) Flip();
+            else if (h < 0 && facingRight) Flip();
         }
         
-        cc.Move(moveDirection * Time.deltaTime);
-    }
-    
-    void HandleAttack()
-    {
-        if (Input.GetMouseButtonDown(0))
+        void Flip()
         {
-            if (Time.time - lastAttackTime >= attackCooldown)
+            facingRight = !facingRight;
+            transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, 1);
+        }
+        
+        void HandleAttack()
+        {
+            if (Input.GetMouseButtonDown(0)) // Sol tık
             {
-                PerformAttack();
-                lastAttackTime = Time.time;
+                if (Time.time - lastAttackTime >= attackCooldown)
+                {
+                    PerformAttack();
+                    lastAttackTime = Time.time;
+                }
             }
         }
-    }
-    
-    void PerformAttack()
-    {
-        Debug.Log("⚔️ Saldırı!");
         
-        RaycastHit hit;
-        Vector3 origin = transform.position + Vector3.up;
-        if (Physics.Raycast(origin, transform.forward, out hit, attackRange))
+        void PerformAttack()
         {
-            IDamageable dmg = hit.collider.GetComponent<IDamageable>();
-            if (dmg != null)
+            Vector2 attackDir = facingRight ? Vector2.right : Vector2.left;
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, attackDir, attackRange);
+            
+            if (hit.collider != null)
             {
-                dmg.TakeDamage(attackDamage, false);
-                Debug.Log($"💥 {hit.collider.name} -> {attackDamage} hasar!");
+                IDamageable dmg = hit.collider.GetComponent<IDamageable>();
+                if (dmg != null)
+                {
+                    dmg.TakeDamage(attackDamage);
+                    Debug.Log($"⚔️ Saldırı! {hit.collider.name} -> {attackDamage} hasar");
+                }
             }
         }
-    }
-    
-    public void TakeDamage(int dmg, bool crit)
-    {
-        if (currentHealth <= 0) return;
         
-        currentHealth -= dmg;
-        if (currentHealth < 0) currentHealth = 0;
+        void HandleManaRegen()
+        {
+            if (Time.time - lastManaRegenTime >= 1f)
+            {
+                currentMana = Mathf.Min(currentMana + (int)manaRegenRate, maxMana);
+                OnManaChanged?.Invoke(currentMana, maxMana);
+                lastManaRegenTime = Time.time;
+            }
+        }
         
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
-        Debug.Log($"💔 Oyuncu {dmg} hasar! (Can: {currentHealth}/{maxHealth})");
+        void HandleSkills()
+        {
+            // 1-5 tuşları ile yetenekler
+            if (Input.GetKeyDown(KeyCode.Alpha1)) SkillSystem.Instance?.UseSkill(0);
+            if (Input.GetKeyDown(KeyCode.Alpha2)) SkillSystem.Instance?.UseSkill(1);
+            if (Input.GetKeyDown(KeyCode.Alpha3)) SkillSystem.Instance?.UseSkill(2);
+            if (Input.GetKeyDown(KeyCode.Alpha4)) SkillSystem.Instance?.UseSkill(3);
+            if (Input.GetKeyDown(KeyCode.Alpha5)) SkillSystem.Instance?.UseSkill(4);
+        }
         
-        if (currentHealth <= 0) Die();
-    }
-    
-    public void TakeDamage(float dmg) => TakeDamage((int)dmg, false);
-    
-    public void Heal(int amount)
-    {
-        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
-    }
-    
-    void Die()
-    {
-        Debug.Log("☠️ Oyuncu öldü!");
-        OnDeath?.Invoke();
-        Invoke(nameof(Respawn), 3f);
-    }
-    
-    void Respawn()
-    {
-        currentHealth = maxHealth;
-        transform.position = new Vector3(0, 1, 0);
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
-        Debug.Log("🔄 Yeniden doğdu!");
+        public void TakeDamage(int damage)
+        {
+            TakeDamage(damage, false);
+        }
+        
+        public void TakeDamage(int damage, bool isCritical)
+        {
+            if (currentHealth <= 0) return;
+            
+            currentHealth -= damage;
+            if (currentHealth < 0) currentHealth = 0;
+            
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+            
+            string crit = isCritical ? " KRITIK!" : "";
+            Debug.Log($"💔 Hasar aldı! {damage}{crit} (Can: {currentHealth}/{maxHealth})");
+            
+            // Hasar efekti
+            StartCoroutine(DamageEffect());
+            
+            if (currentHealth <= 0) Die();
+        }
+        
+        public void TakeDamage(float damage)
+        {
+            TakeDamage((int)damage, false);
+        }
+        
+        System.Collections.IEnumerator DamageEffect()
+        {
+            SpriteRenderer sr = GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                Color original = sr.color;
+                sr.color = Color.red;
+                yield return new WaitForSeconds(0.1f);
+                sr.color = original;
+            }
+        }
+        
+        public void Heal(int amount)
+        {
+            currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+            Debug.Log($"💚 İyileşti! +{amount} (Can: {currentHealth}/{maxHealth})");
+        }
+        
+        public void UseMana(int amount)
+        {
+            currentMana -= amount;
+            if (currentMana < 0) currentMana = 0;
+            OnManaChanged?.Invoke(currentMana, maxMana);
+        }
+        
+        void Die()
+        {
+            Debug.Log("☠️ Oyuncu öldü!");
+            OnDeath?.Invoke();
+            
+            // 3 saniye sonra yeniden doğ
+            Invoke(nameof(Respawn), 3f);
+        }
+        
+        void Respawn()
+        {
+            currentHealth = maxHealth;
+            transform.position = Vector3.zero;
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+            Debug.Log("🔄 Yeniden doğdu!");
+        }
     }
 }
