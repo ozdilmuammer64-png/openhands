@@ -74,6 +74,12 @@ namespace KnightOnline
         
         void SetupGame()
         {
+            if (Application.isPlaying)
+            {
+                EditorUtility.DisplayDialog("Hata", "Oyun çalışırken kurulum yapılamaz! Önce Play modunu durdurun.", "Tamam");
+                return;
+            }
+            
             Debug.Log("🎮 Knight Online kurulumu başlıyor...");
             
             // 1. Sahne oluştur
@@ -105,23 +111,20 @@ namespace KnightOnline
         {
             Scene scene = SceneManager.GetActiveScene();
             
-            // Sahneyi temizle
-            if (scene.isDirty || scene.name != "")
+            // Sahne boşsa veya yoksa yeni sahne oluştur
+            if (!scene.IsValid() || string.IsNullOrEmpty(scene.name))
             {
-                GameObject[] allObjects = scene.GetRootGameObjects();
-                foreach (GameObject obj in allObjects)
-                {
-                    if (obj != null && obj.name != "GameManager")
-                    {
-                        DestroyImmediate(obj);
-                    }
-                }
+                scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects);
             }
             
-            // Yeni sahne oluştur
-            if (string.IsNullOrEmpty(scene.name))
+            // Sahneyi temizle
+            GameObject[] allObjects = scene.GetRootGameObjects();
+            foreach (GameObject obj in allObjects)
             {
-                EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects);
+                if (obj != null)
+                {
+                    DestroyImmediate(obj);
+                }
             }
         }
         
