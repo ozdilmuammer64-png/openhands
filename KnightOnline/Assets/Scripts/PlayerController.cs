@@ -127,6 +127,58 @@ namespace KnightOnline
                 playerCamera = cam.AddComponent<Camera>();
                 playerCamera.nearClipPlane = 0.1f;
             }
+            
+            // Varsayılan yetenekleri ekle
+            SetupDefaultSkills();
+        }
+        
+        void SetupDefaultSkills()
+        {
+            SkillSystem skillSystem = FindObjectOfType<SkillSystem>();
+            if (skillSystem == null)
+            {
+                skillSystem = gameObject.AddComponent<SkillSystem>();
+            }
+            skillSystem.player = this;
+            
+            // Varsayılan yetenekler
+            for (int i = 0; i < 9; i++)
+            {
+                SkillData skill = ScriptableObject.CreateInstance<SkillData>();
+                skill.skillName = ((DefaultSkills)i).ToString();
+                skill.manaCost = 10 + (i * 5);
+                skill.baseDamage = 10 + (i * 8);
+                skill.cooldown = 2f;
+                skill.skillType = SkillType.Active;
+                
+                switch (i)
+                {
+                    case 0: skill.skillName = "Power Strike"; break;
+                    case 1: skill.skillName = "Fireball"; skill.manaCost = 25; break;
+                    case 2: skill.skillName = "Heal"; skill.healAmount = 30; break;
+                    case 3: skill.skillName = "Shield"; skill.buffDuration = 5; break;
+                    case 4: skill.skillName = "Dash"; skill.manaCost = 15; break;
+                    case 5: skill.skillName = "Smite"; break;
+                    case 6: skill.skillName = "Frost"; break;
+                    case 7: skill.skillName = "Poison"; break;
+                    case 8: skill.skillName = "Ultimate"; skill.manaCost = 100; skill.baseDamage = 200; break;
+                }
+                
+                skillSystem.learnedSkills.Add(new LearnedSkill { data = skill, currentCooldown = 0 });
+            }
+        }
+        
+        enum DefaultSkills
+        {
+            PowerStrike,
+            Fireball,
+            Heal,
+            Shield,
+            Dash,
+            Smite,
+            Frost,
+            Poison,
+            Ultimate
         }
         
         void SetupClassStats()

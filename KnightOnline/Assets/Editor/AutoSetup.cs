@@ -352,24 +352,8 @@ namespace KnightOnline
             // Altın
             CreateText(playerInfoPanel, "GoldText", "💰 0", 14);
             
-            // Yetenek barı
-            GameObject skillBarPanel = CreatePanel(hudPanel, "SkillBarPanel");
-            skillBarPanel.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0);
-            skillBarPanel.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0);
-            skillBarPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 10);
-            skillBarPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(500, 70);
-            
-            for (int i = 0; i < 9; i++)
-            {
-                float xPos = (i - 4) * 55;
-                GameObject skillSlot = CreatePanel(skillBarPanel, $"SkillSlot_{i}");
-                skillSlot.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0);
-                skillSlot.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0);
-                skillSlot.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, 0);
-                skillSlot.GetComponent<RectTransform>().sizeDelta = new Vector2(50, 50);
-                
-                CreateText(skillSlot, "KeyText", (i + 1).ToString(), 10, FontStyle.Bold);
-            }
+            // Yetenek barı (ayrı method)
+            CreateSkillBar();
             
             // Ölüm paneli
             GameObject deathPanel = CreatePanel(mainCanvas, "DeathPanel");
@@ -410,6 +394,7 @@ namespace KnightOnline
             textComponent.fontSize = fontSize;
             textComponent.fontStyle = fontStyle;
             textComponent.color = Color.white;
+            textComponent.raycastTarget = false;
             
             RectTransform rect = textObj.GetComponent<RectTransform>();
             rect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -434,6 +419,7 @@ namespace KnightOnline
             bg.transform.parent = container.transform;
             UnityEngine.UI.Image bgImg = bg.AddComponent<UnityEngine.UI.Image>();
             bgImg.color = new Color(0.2f, 0.2f, 0.2f);
+            bgImg.raycastTarget = false;
             RectTransform bgRect = bg.GetComponent<RectTransform>();
             bgRect.anchorMin = Vector2.zero;
             bgRect.anchorMax = Vector2.one;
@@ -447,11 +433,82 @@ namespace KnightOnline
             fillImg.color = fillColor;
             fillImg.type = UnityEngine.UI.Image.Type.Filled;
             fillImg.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
+            fillImg.raycastTarget = false;
             RectTransform fillRect = fill.GetComponent<RectTransform>();
             fillRect.anchorMin = Vector2.zero;
             fillRect.anchorMax = Vector2.one;
             fillRect.offsetMin = new Vector2(2, 2);
             fillRect.offsetMax = new Vector2(-2, -2);
+        }
+        
+        void CreateSkillBar()
+        {
+            Debug.Log("⚔️ Yetenek barı oluşturuluyor...");
+            
+            // Ana Canvas - GraphicRaycaster raycastTarget = false
+            GameObject mainCanvas = GameObject.Find("MainCanvas");
+            if (mainCanvas == null) return;
+            
+            // Canvas ayarları
+            Canvas canvas = mainCanvas.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            
+            // Yetenek barı paneli
+            GameObject skillBarPanel = CreatePanel(mainCanvas, "SkillBarPanel");
+            skillBarPanel.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0);
+            skillBarPanel.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0);
+            skillBarPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 20);
+            skillBarPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(550, 80);
+            
+            // Yetenek slotları
+            string[] skillNames = { "Power Strike", "Fireball", "Heal", "Shield", "Dash", "Smite", "Frost", "Poison", "Ultimate" };
+            Color[] skillColors = { Color.red, new Color(1f, 0.5f, 0f), Color.green, Color.blue, Color.cyan, Color.yellow, Color.cyan, Color.magenta, new Color(1f, 0.8f, 0f) };
+            
+            for (int i = 0; i < 9; i++)
+            {
+                float xPos = (i - 4) * 60;
+                
+                // Slot container
+                GameObject slot = CreatePanel(skillBarPanel, $"SkillSlot_{i}");
+                slot.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0.5f);
+                slot.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0.5f);
+                slot.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, 0);
+                slot.GetComponent<RectTransform>().sizeDelta = new Vector2(55, 55);
+                
+                // Slot arkaplan
+                GameObject slotBg = new GameObject("SlotBackground");
+                slotBg.transform.parent = slot.transform;
+                UnityEngine.UI.Image slotBgImg = slotBg.AddComponent<UnityEngine.UI.Image>();
+                slotBgImg.color = new Color(0.2f, 0.2f, 0.2f, 0.9f);
+                RectTransform slotBgRect = slotBg.GetComponent<RectTransform>();
+                slotBgRect.anchorMin = Vector2.zero;
+                slotBgRect.anchorMax = Vector2.one;
+                slotBgRect.offsetMin = Vector2.zero;
+                slotBgRect.offsetMax = Vector2.zero;
+                
+                // Yetenek ikonu
+                GameObject skillIcon = new GameObject("SkillIcon");
+                skillIcon.transform.parent = slot.transform;
+                UnityEngine.UI.Image skillImg = skillIcon.AddComponent<UnityEngine.UI.Image>();
+                skillImg.color = skillColors[i];
+                skillImg.raycastTarget = false;
+                RectTransform skillRect = skillIcon.GetComponent<RectTransform>();
+                skillRect.anchorMin = new Vector2(0.1f, 0.1f);
+                skillRect.anchorMax = new Vector2(0.9f, 0.9f);
+                skillRect.offsetMin = Vector2.zero;
+                skillRect.offsetMax = Vector2.zero;
+                
+                // Tuş göstergesi
+                GameObject keyText = CreateText(slot, $"Key_{i}", (i + 1).ToString(), 14, FontStyle.Bold);
+                keyText.GetComponent<UnityEngine.UI.Text>().color = Color.yellow;
+                RectTransform keyRect = keyText.GetComponent<RectTransform>();
+                keyRect.anchorMin = new Vector2(0, 1);
+                keyRect.anchorMax = new Vector2(0, 1);
+                keyRect.anchoredPosition = new Vector2(5, -5);
+                keyRect.sizeDelta = new Vector2(20, 20);
+            }
+            
+            Debug.Log("✅ Yetenek barı oluşturuldu");
         }
         
         void ConnectReferences()

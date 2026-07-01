@@ -5,7 +5,7 @@ namespace KnightOnline
     public class CameraFollow : MonoBehaviour
     {
         public Transform target;
-        public Vector3 offset = new Vector3(0, 5, -10);
+        public Vector3 offset = new Vector3(0, 8, -12);
         public float smoothSpeed = 10f;
         public float rotationSpeed = 5f;
         
@@ -40,15 +40,15 @@ namespace KnightOnline
             // Calculate rotation
             Quaternion rotation = Quaternion.Euler(currentY, currentX, 0);
             
-            // Calculate position
+            // Calculate position - look at upper body
             Vector3 position = rotation * offset;
             Vector3 finalPosition = target.position + position;
             
             // Smooth follow
             transform.position = Vector3.Lerp(transform.position, finalPosition, smoothSpeed * Time.deltaTime);
             
-            // Look at target
-            transform.LookAt(target.position + Vector3.up);
+            // Look at target upper body
+            transform.LookAt(target.position + Vector3.up * 1.5f);
         }
     }
 }
