@@ -104,19 +104,24 @@ namespace KnightOnline
         void SetupScene()
         {
             Scene scene = SceneManager.GetActiveScene();
+            
+            // Sahneyi temizle
+            if (scene.isDirty || scene.name != "")
+            {
+                GameObject[] allObjects = scene.GetRootGameObjects();
+                foreach (GameObject obj in allObjects)
+                {
+                    if (obj != null && obj.name != "GameManager")
+                    {
+                        DestroyImmediate(obj);
+                    }
+                }
+            }
+            
+            // Yeni sahne oluştur
             if (string.IsNullOrEmpty(scene.name))
             {
                 EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects);
-            }
-            
-            // Sahneyi temizle
-            GameObject[] allObjects = scene.GetRootGameObjects();
-            foreach (GameObject obj in allObjects)
-            {
-                if (obj.name != "GameManager")
-                {
-                    DestroyImmediate(obj);
-                }
             }
         }
         
