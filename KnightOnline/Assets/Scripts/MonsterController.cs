@@ -1,158 +1,58 @@
 using UnityEngine;
 using UnityEngine.AI;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace KnightOnline
 {
-    public enum MonsterType { Normal, Elite, Boss, Guardian }
-    public enum MonsterState { Idle, Patrol, Chase, Attack, Hurt, Dead }
-    
     public class MonsterController : MonoBehaviour, IDamageable
     {
-        void Awake()
-        {
-            // Nesneyi yukarı kaldır (yerden)
-            Vector3 pos = transform.position;
-            pos.y = 1f; // Yerden 1 birim yukarıda
-            transform.position = pos;
-        }
-        
-        [Header("Monster Info")]
-        public string monsterName = "Goblin";
-        public MonsterType monsterType = MonsterType.Normal;
-        public int level = 1;
-        public int experienceReward = 10;
-        public int goldRewardMin = 5;
-        public int goldRewardMax = 15;
-        
         [Header("Stats")]
-        public float maxHealth = 50f;
-        public float currentHealth = 50f;
-        public int minDamage = 5;
-        public int maxDamage = 10;
-        public float attackSpeed = 1f;
-        public float attackRange = 1.5f;
-        public float attackCooldown = 1.5f;
-        public float armor = 2f;
-        public float criticalChance = 3f;
+        public string monsterName = "Goblin";
+        public int maxHealth = 100;
+        public int currentHealth = 100;
+        public int attackDamage = 10;
         
-        [Header("AI Settings")]
-        public float detectionRange = 10f;
-        public float chaseRange = 15f;
-        public float patrolRange = 5f;
-        public float patrolSpeed = 2f;
-        public float chaseSpeed = 4f;
-        public float idleTime = 2f;
+        [Header("Settings")]
+        public float moveSpeed = 2f;
+        public float attackRange = 2f;
+        public float sightRange = 10f;
+        public float attackCooldown = 1f;
         
-        [Header("Components")]
-        public Animator animator;
-        public Collider attackCollider;
-        public GameObject deathEffect;
-        public GameObject hitEffect;
-        public GameObject healthBarPrefab;
-        public Transform healthBarPosition;
-        
-        [Header("Patrol Points")]
-        public List<Transform> patrolPoints = new List<Transform>();
-        public bool randomPatrol = true;
-        
-        // Private variables
-        private MonsterState currentState = MonsterState.Idle;
-        private NavMeshAgent navMeshAgent;
-        private Transform target;
-        private Vector3 spawnPoint;
-        private Vector3 currentPatrolPoint;
-        private float lastAttackTime;
-        private float lastStateChangeTime;
-        private float stateTimer;
-        private int currentPatrolIndex;
-        private bool isDead;
-        private bool isHurt;
-        private CanvasGroup healthBarCanvas;
-        
-        // Drops
-        [Header("Drops")]
-        public List<DropItem> possibleDrops = new List<DropItem>();
-        public int goldDropChance = 80;
-        
-        public float CurrentHealth => currentHealth;
-        public float MaxHealth => maxHealth;
-        public bool IsDead => isDead;
+        [Header("Patrol")]
+        public bool canPatrol = true;
+        public float patrolRadius = 5f;
         
         // Events
-        public System.Action<MonsterController> OnDeath;
-        public System.Action<float, float> OnHealthChanged;
+        public System.Action<int, int> OnHealthChanged;
+        public System.Action OnDeath;
+        
+        private NavMeshAgent navAgent;
+        private Transform player;
+        private float lastAttackTime = 0;
+        private Vector3 spawnPoint;
+        private bool isDead = false;
         
         void Start()
         {
-            navMeshAgent = GetComponent<NavMeshAgent>();
-            if (navMeshAgent == null)
-            {
-                navMeshAgent = gameObject.AddComponent<NavMeshAgent>();
-            }
+            navAgent = GetComponent<NavMeshAgent>();
+            if (navAgent == null)
+                navAgent = gameObject.AddComponent<NavMeshAgent>();
             
+            navAgent.speed = moveSpeed;
+            navAgent.stoppingDistance = attackRange;
+            
+            player = GameObject.FindGameObjectWithTag("Player")?.transform;
             spawnPoint = transform.position;
-            currentHealth = maxHealth;
             
-            SetupByType();
-            CreateHealthBar();
-            StartIdle();
-        }
-        
-        void SetupByType()
-        {
-            switch (monsterType)
+            // NavMesh kontrolü
+            if (!navAgent.isOnNavMesh)
             {
-                case MonsterType.Normal:
-                    navMeshAgent.speed = patrolSpeed;
-                    break;
-                case MonsterType.Elite:
-                    maxHealth *= 2f;
-                    currentHealth = maxHealth;
-                    minDamage *= 2;
-                    maxDamage *= 2;
-                    navMeshAgent.speed = patrolSpeed * 1.2f;
-                    gameObject.name = $"[Elite] {monsterName}";
-                    break;
-                case MonsterType.Boss:
-                    maxHealth *= 5f;
-                    currentHealth = maxHealth;
-                    minDamage *= 3;
-                    maxDamage *= 3;
-                    experienceReward *= 5;
-                    goldRewardMin *= 10;
-                    goldRewardMax *= 10;
-                    navMeshAgent.speed = patrolSpeed * 0.9f;
-                    gameObject.name = $"[BOSS] {monsterName}";
-                    break;
-                case MonsterType.Guardian:
-                    maxHealth *= 3f;
-                    currentHealth = maxHealth;
-                    minDamage *= 2;
-                    maxDamage *= 2;
-                    detectionRange *= 1.5f;
-                    gameObject.name = $"[Guardian] {monsterName}";
-                    break;
+                Debug.LogWarning($"⚠️ {monsterName} NavMesh üzerinde değil! NavMesh bake edilmeli.");
             }
             
-            // Scale with level
-            float levelMultiplier = 1f + (level - 1) * 0.15f;
-            maxHealth *= levelMultiplier;
-            currentHealth = maxHealth;
-            minDamage = Mathf.RoundToInt(minDamage * levelMultiplier);
-            maxDamage = Mathf.RoundToInt(maxDamage * levelMultiplier);
-            experienceReward = Mathf.RoundToInt(experienceReward * levelMultiplier);
-        }
-        
-        void CreateHealthBar()
-        {
-            if (healthBarPrefab != null)
+            // Rastgele patrol başlat
+            if (canPatrol)
             {
-                GameObject healthBarObj = Instantiate(healthBarPrefab, transform);
-                healthBarObj.transform.localPosition = healthBarPosition != null ? 
-                    healthBarPosition.localPosition : Vector3.up * 2f;
-                healthBarCanvas = healthBarObj.GetComponent<CanvasGroup>();
+                InvokeRepeating(nameof(Patrol), 2f, 5f);
             }
         }
         
@@ -160,384 +60,130 @@ namespace KnightOnline
         {
             if (isDead) return;
             
-            switch (currentState)
+            if (player != null)
             {
-                case MonsterState.Idle:
-                    HandleIdle();
-                    break;
-                case MonsterState.Patrol:
-                    HandlePatrol();
-                    break;
-                case MonsterState.Chase:
-                    HandleChase();
-                    break;
-                case MonsterState.Attack:
-                    HandleAttack();
-                    break;
-            }
-            
-            CheckForTarget();
-        }
-        
-        void CheckForTarget()
-        {
-            if (currentState == MonsterState.Attack || currentState == MonsterState.Chase) return;
-            
-            Collider[] hits = Physics.OverlapSphere(transform.position, detectionRange, LayerMask.GetMask("Player"));
-            if (hits.Length > 0)
-            {
-                target = hits[0].transform;
-                ChangeState(MonsterState.Chase);
-            }
-        }
-        
-        void StartIdle()
-        {
-            ChangeState(MonsterState.Idle);
-            stateTimer = Random.Range(idleTime * 0.5f, idleTime * 1.5f);
-        }
-        
-        void HandleIdle()
-        {
-            stateTimer -= Time.deltaTime;
-            if (animator != null && animator.runtimeAnimatorController != null) animator.SetFloat("Speed", 0);
-            
-            if (stateTimer <= 0)
-            {
-                if (ShouldPatrol())
+                float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+                
+                // Oyuncu görüş alanında mı?
+                if (distanceToPlayer <= sightRange)
                 {
-                    StartPatrol();
-                }
-                else
-                {
-                    stateTimer = Random.Range(idleTime * 0.5f, idleTime * 1.5f);
-                }
-            }
-        }
-        
-        bool ShouldPatrol()
-        {
-            return patrolPoints.Count > 0 || patrolRange > 0;
-        }
-        
-        void StartPatrol()
-        {
-            if (navMeshAgent == null || !navMeshAgent.isOnNavMesh || !navMeshAgent.isActiveAndEnabled)
-            {
-                StartIdle();
-                return;
-            }
-            
-            ChangeState(MonsterState.Patrol);
-            
-            if (patrolPoints.Count > 0)
-            {
-                if (randomPatrol)
-                {
-                    currentPatrolIndex = Random.Range(0, patrolPoints.Count);
-                }
-                else
-                {
-                    currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Count;
-                }
-                currentPatrolPoint = patrolPoints[currentPatrolIndex].position;
-            }
-            else
-            {
-                currentPatrolPoint = spawnPoint + new Vector3(
-                    Random.Range(-patrolRange, patrolRange),
-                    0,
-                    Random.Range(-patrolRange, patrolRange)
-                );
-            }
-            
-            navMeshAgent.SetDestination(currentPatrolPoint);
-            navMeshAgent.speed = patrolSpeed;
-        }
-        
-        bool HasAnimator()
-        {
-            return animator != null && animator.runtimeAnimatorController != null;
-        }
-        
-        void HandlePatrol()
-        {
-            if (navMeshAgent == null || !navMeshAgent.isOnNavMesh || !navMeshAgent.isActiveAndEnabled)
-            {
-                StartIdle();
-                return;
-            }
-            
-            if (navMeshAgent.remainingDistance < 0.5f)
-            {
-                StartIdle();
-                return;
-            }
-            
-            if (HasAnimator()) animator.SetFloat("Speed", navMeshAgent.velocity.magnitude);
-        }
-        
-        void HandleChase()
-        {
-            if (navMeshAgent == null || !navMeshAgent.isOnNavMesh || !navMeshAgent.isActiveAndEnabled)
-            {
-                StartIdle();
-                return;
-            }
-            
-            if (target == null)
-            {
-                StartIdle();
-                return;
-            }
-            
-            float distanceToTarget = Vector3.Distance(transform.position, target.position);
-            
-            if (distanceToTarget > chaseRange)
-            {
-                StartIdle();
-                target = null;
-                return;
-            }
-            
-            if (distanceToTarget <= attackRange)
-            {
-                ChangeState(MonsterState.Attack);
-                return;
-            }
-            
-            navMeshAgent.SetDestination(target.position);
-            navMeshAgent.speed = chaseSpeed;
-            navMeshAgent.stoppingDistance = attackRange - 0.5f;
-            
-            if (HasAnimator()) animator.SetFloat("Speed", navMeshAgent.velocity.magnitude);
-            
-            // Look at target
-            Vector3 direction = target.position - transform.position;
-            direction.y = 0;
-            if (direction.magnitude > 0.1f)
-            {
-                transform.rotation = Quaternion.Slerp(
-                    transform.rotation,
-                    Quaternion.LookRotation(direction),
-                    5f * Time.deltaTime
-                );
-            }
-        }
-        
-        void HandleAttack()
-        {
-            if (target == null || target.GetComponent<PlayerController>()?.IsDead == true)
-            {
-                StartIdle();
-                return;
-            }
-            
-            float distanceToTarget = Vector3.Distance(transform.position, target.position);
-            
-            if (distanceToTarget > attackRange * 1.5f)
-            {
-                ChangeState(MonsterState.Chase);
-                return;
-            }
-            
-            // Face target
-            Vector3 direction = target.position - transform.position;
-            direction.y = 0;
-            if (direction.magnitude > 0.1f)
-            {
-                transform.rotation = Quaternion.Slerp(
-                    transform.rotation,
-                    Quaternion.LookRotation(direction),
-                    10f * Time.deltaTime
-                );
-            }
-            
-            if (HasAnimator()) animator.SetFloat("Speed", 0);
-            
-            // Attack
-            if (Time.time - lastAttackTime >= attackCooldown / attackSpeed)
-            {
-                StartCoroutine(PerformAttack());
-            }
-        }
-        
-        System.Collections.IEnumerator PerformAttack()
-        {
-            if (HasAnimator()) animator.SetTrigger("Attack");
-            lastAttackTime = Time.time;
-            
-            yield return new WaitForSeconds(0.3f);
-            
-            if (target != null)
-            {
-                float distanceToTarget = Vector3.Distance(transform.position, target.position);
-                if (distanceToTarget <= attackRange)
-                {
-                    IDamageable damageable = target.GetComponent<IDamageable>();
-                    if (damageable != null)
+                    // Saldırı menzilinde mi?
+                    if (distanceToPlayer <= attackRange)
                     {
-                        int damage = CalculateDamage();
-                        bool isCritical = Random.Range(0, 100) < criticalChance;
-                        if (isCritical) damage = Mathf.RoundToInt(damage * 1.5f);
-                        
-                        damageable.TakeDamage(damage, isCritical);
+                        Attack();
+                    }
+                    else
+                    {
+                        ChasePlayer();
                     }
                 }
+                else
+                {
+                    // Oyuncuyu kaybetti, idle
+                    StopChase();
+                }
             }
-            
-            yield return new WaitForSeconds(attackCooldown / attackSpeed - 0.3f);
         }
         
-        int CalculateDamage()
+        void ChasePlayer()
         {
-            int baseDamage = Random.Range(minDamage, maxDamage + 1);
-            float levelBonus = 1f + (level - 1) * 0.1f;
-            return Mathf.RoundToInt(baseDamage * levelBonus);
-        }
-        
-        void ChangeState(MonsterState newState)
-        {
-            if (currentState != newState)
+            if (navAgent != null && navAgent.isOnNavMesh)
             {
-                currentState = newState;
-                if (HasAnimator()) animator.SetInteger("State", (int)newState);
-                lastStateChangeTime = Time.time;
+                navAgent.SetDestination(player.position);
+                navAgent.stoppingDistance = attackRange;
+                
+                // Yöne döndür
+                Vector3 dir = player.position - transform.position;
+                dir.y = 0;
+                if (dir.magnitude > 0.1f)
+                    transform.rotation = Quaternion.LookRotation(dir);
             }
         }
         
-        public void TakeDamage(float damage)
+        void StopChase()
+        {
+            if (navAgent != null)
+            {
+                navAgent.ResetPath();
+            }
+        }
+        
+        void Patrol()
         {
             if (isDead) return;
+            if (player != null && Vector3.Distance(transform.position, player.position) <= sightRange) return;
             
-            float reducedDamage = damage * (1 - armor / 100f);
-            currentHealth -= reducedDamage;
-            currentHealth = Mathf.Max(0, currentHealth);
-            
-            if (HasAnimator()) animator.SetTrigger("Hurt");
-            OnHealthChanged?.Invoke(currentHealth, maxHealth);
-            
-            if (hitEffect != null)
+            if (navAgent != null && navAgent.isOnNavMesh && canPatrol)
             {
-                GameObject hit = Instantiate(hitEffect, transform.position + Vector3.up, Quaternion.identity);
-                Destroy(hit, 2f);
-            }
-            
-            if (currentHealth <= 0)
-            {
-                Die();
-            }
-            else if (currentState != MonsterState.Attack && currentState != MonsterState.Chase)
-            {
-                // Aggro
-                if (target != null)
+                Vector3 randomPoint = spawnPoint + Random.insideUnitSphere * patrolRadius;
+                NavMeshHit hit;
+                if (NavMesh.SamplePosition(randomPoint, out hit, 2f, NavMesh.AllAreas))
                 {
-                    ChangeState(MonsterState.Chase);
+                    navAgent.SetDestination(hit.position);
                 }
+            }
+        }
+        
+        void Attack()
+        {
+            if (Time.time - lastAttackTime >= attackCooldown)
+            {
+                lastAttackTime = Time.time;
+                
+                // Oyuncuya hasar ver
+                IDamageable damageable = player.GetComponent<IDamageable>();
+                if (damageable != null)
+                {
+                    damageable.TakeDamage(attackDamage, false);
+                    Debug.Log($"💀 {monsterName}, oyuncuya {attackDamage} hasar verdi!");
+                }
+                
+                // Yöne döndür
+                Vector3 dir = player.position - transform.position;
+                dir.y = 0;
+                if (dir.magnitude > 0.1f)
+                    transform.rotation = Quaternion.LookRotation(dir);
             }
         }
         
         public void TakeDamage(int damage, bool isCritical)
         {
-            TakeDamage((float)damage);
+            if (isDead) return;
+            
+            currentHealth -= damage;
+            if (currentHealth < 0) currentHealth = 0;
+            
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+            
+            string critText = isCritical ? " KRITIK!" : "";
+            Debug.Log($"💥 {monsterName} {damage} hasar yedi!{critText} (Can: {currentHealth}/{maxHealth})");
+            
+            if (currentHealth <= 0)
+            {
+                Die();
+            }
         }
         
         void Die()
         {
+            if (isDead) return;
             isDead = true;
-            ChangeState(MonsterState.Dead);
-            if (HasAnimator()) animator.SetTrigger("Death");
             
-            navMeshAgent.enabled = false;
+            Debug.Log($"☠️ {monsterName} öldü!");
+            OnDeath?.Invoke();
             
-            // Drop loot
-            DropLoot();
-            
-            // Give experience
-            if (target != null)
-            {
-                PlayerController player = target.GetComponent<PlayerController>();
-                if (player != null)
-                {
-                    player.GainExperience(experienceReward);
-                }
-            }
-            
-            OnDeath?.Invoke(this);
-            
-            // Respawn
-            StartCoroutine(RespawnAfterDelay(GameSettings.Instance.monsterRespawnTime));
-            
-            if (deathEffect != null)
-            {
-                Instantiate(deathEffect, transform.position + Vector3.up, Quaternion.identity);
-            }
+            // Yeniden doğ
+            Invoke(nameof(Respawn), 3f);
         }
         
-        void DropLoot()
+        void Respawn()
         {
-            // Drop gold
-            if (Random.Range(0, 100) < goldDropChance)
-            {
-                int goldAmount = Random.Range(goldRewardMin, goldRewardMax + 1);
-                if (target != null)
-                {
-                    PlayerController player = target.GetComponent<PlayerController>();
-                    if (player != null)
-                    {
-                        player.AddGold(goldAmount);
-                    }
-                }
-            }
-            
-            // Drop items
-            foreach (DropItem drop in possibleDrops)
-            {
-                if (Random.Range(0, 100) < drop.dropChance)
-                {
-                    GameObject item = Instantiate(drop.itemPrefab, transform.position + Vector3.up, Quaternion.identity);
-                    ItemPickup pickup = item.AddComponent<ItemPickup>();
-                    pickup.Initialize(drop.itemData);
-                }
-            }
-        }
-        
-        System.Collections.IEnumerator RespawnAfterDelay(float delay)
-        {
-            yield return new WaitForSeconds(delay);
-            
-            isDead = false;
             currentHealth = maxHealth;
+            isDead = false;
             transform.position = spawnPoint;
-            navMeshAgent.enabled = true;
-            
-            gameObject.SetActive(true);
+            transform.position += Vector3.up; // Yerden biraz yukarı
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
-            StartIdle();
+            Debug.Log($"🔄 {monsterName} yeniden doğdu!");
         }
-        
-        void OnDrawGizmosSelected()
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, detectionRange);
-            
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, attackRange);
-            
-            Gizmos.color = Color.blue;
-            Gizmos.DrawWireSphere(transform.position, chaseRange);
-            
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(spawnPoint, patrolRange);
-        }
-    }
-    
-    [System.Serializable]
-    public class DropItem
-    {
-        public GameObject itemPrefab;
-        public ItemData itemData;
-        [Range(0, 100)]
-        public float dropChance = 10f;
     }
 }
