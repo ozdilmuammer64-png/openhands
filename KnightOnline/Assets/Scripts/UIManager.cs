@@ -326,17 +326,17 @@ namespace KnightOnline
             }
         }
         
-        void OnSkillCast(SkillData skill)
+        void OnSkillCast(Skill skill)
         {
-            ShowNotification($"Cast {skill.skillName}", NotificationType.Skill);
+            ShowNotification($"Cast {skill.name}", NotificationType.Skill);
         }
         
-        void OnSkillCooldownStart(SkillData skill, float cooldown)
+        void OnSkillCooldownStart(Skill skill, float cooldown)
         {
             // Update cooldown UI
         }
         
-        void OnSkillCooldownEnd(SkillData skill)
+        void OnSkillCooldownEnd(Skill skill)
         {
             // Update cooldown UI
         }
