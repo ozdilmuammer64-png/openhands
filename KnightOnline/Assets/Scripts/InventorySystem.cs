@@ -6,6 +6,7 @@ namespace KnightOnline
     public enum ItemType { Weapon, Armor, Helmet, Shield, Boots, Gloves, Belt, Ring, Amulet, Potion, Scroll, Quest, Material, Gem }
     public enum ItemRarity { Common, Uncommon, Rare, Epic, Legendary }
     public enum EquipmentSlot { None, Weapon, Armor, Helmet, Shield, Boots, Gloves, Belt, Ring1, Ring2, Amulet, LeftRing, RightRing }
+    public enum PlayerClass { Warrior, Mage, Rogue, Priest, Paladin }
     
     [CreateAssetMenu(fileName = "New Item", menuName = "Knight Online/Item")]
     public class ItemData : ScriptableObject

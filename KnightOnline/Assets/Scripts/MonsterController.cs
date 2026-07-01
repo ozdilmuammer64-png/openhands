@@ -164,6 +164,11 @@ namespace KnightOnline
             }
         }
         
+        public void TakeDamage(float damage)
+        {
+            TakeDamage((int)damage, false);
+        }
+        
         void Die()
         {
             if (isDead) return;
