@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 namespace KnightOnline
 {
@@ -10,20 +9,20 @@ namespace KnightOnline
         
         [Header("Health Bar")]
         public Image healthBarFill;
-        public TextMeshProUGUI healthText;
+        public Text healthText;
         
         [Header("Mana Bar")]
         public Image manaBarFill;
-        public TextMeshProUGUI manaText;
+        public Text manaText;
         
         [Header("Skill Icons")]
         public Image[] skillIconImages;
-        public TextMeshProUGUI[] skillHotkeyTexts;
+        public Text[] skillHotkeyTexts;
         public Image[] skillCooldownImages;
-        public TextMeshProUGUI[] skillCooldownTexts;
+        public Text[] skillCooldownTexts;
         
         [Header("Notifications")]
-        public TextMeshProUGUI notificationText;
+        public Text notificationText;
         float notificationTimer = 0;
         
         PlayerController player;
@@ -82,10 +81,10 @@ namespace KnightOnline
             
             for (int i = 0; i < skillIconImages.Length && i < skillSystem.skills.Count; i++)
             {
-                if (skillHotkeyTexts[i] != null)
+                if (skillHotkeyTexts != null && i < skillHotkeyTexts.Length && skillHotkeyTexts[i] != null)
                     skillHotkeyTexts[i].text = (i + 1).ToString();
                 
-                if (skillCooldownTexts[i] != null)
+                if (skillCooldownTexts != null && i < skillCooldownTexts.Length && skillCooldownTexts[i] != null)
                     skillCooldownTexts[i].text = "";
             }
         }
@@ -104,7 +103,7 @@ namespace KnightOnline
                     if (skillCooldownImages[i] != null)
                         skillCooldownImages[i].fillAmount = fill;
                     
-                    if (skillCooldownTexts[i] != null)
+                    if (skillCooldownTexts != null && i < skillCooldownTexts.Length && skillCooldownTexts[i] != null)
                         skillCooldownTexts[i].text = Mathf.CeilToInt(skill.currentCooldown).ToString();
                 }
                 else
