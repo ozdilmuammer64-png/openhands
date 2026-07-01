@@ -194,6 +194,13 @@ namespace KnightOnline
         
         void CreateEnemyLayer()
         {
+            int existingLayer = LayerMask.NameToLayer("Enemy");
+            if (existingLayer != -1)
+            {
+                Debug.Log("✅ Enemy layer zaten mevcut (katman " + existingLayer + ")");
+                return;
+            }
+            
             // 8. katmanı "Enemy" olarak ayarla
             SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
             SerializedProperty layers = tagManager.FindProperty("layers");
@@ -204,16 +211,11 @@ namespace KnightOnline
                 for (int i = 8; i < layers.arraySize; i++)
                 {
                     SerializedProperty layerProp = layers.GetArrayElementAtIndex(i);
-                    if (layerProp.stringValue == "Enemy")
-                    {
-                        found = true;
-                        break;
-                    }
                     if (string.IsNullOrEmpty(layerProp.stringValue))
                     {
                         layerProp.stringValue = "Enemy";
                         tagManager.ApplyModifiedProperties();
-                        Debug.Log("✅ Enemy layer (katman " + i + ") oluşturuldu!");
+                        Debug.Log("✅ Enemy layer oluşturuldu (katman " + i + ")");
                         found = true;
                         break;
                     }
@@ -664,7 +666,12 @@ namespace KnightOnline
             monster.name = name;
             monster.transform.position = position;
             monster.transform.localScale = new Vector3(1, 2, 1);
-            monster.layer = LayerMask.NameToLayer("Enemy");
+            
+            // Layer güvenli şekilde ayarla
+            int enemyLayer = LayerMask.NameToLayer("Enemy");
+            if (enemyLayer == -1) enemyLayer = 8; // Fallback
+            monster.layer = enemyLayer;
+            monster.tag = "Enemy";
             
             Material mat = new Material(Shader.Find("Standard"));
             mat.color = color;
@@ -692,7 +699,12 @@ namespace KnightOnline
             boss.name = name;
             boss.transform.position = position;
             boss.transform.localScale = new Vector3(3, 5, 3);
-            boss.layer = LayerMask.NameToLayer("Enemy");
+            
+            // Layer güvenli şekilde ayarla
+            int enemyLayer = LayerMask.NameToLayer("Enemy");
+            if (enemyLayer == -1) enemyLayer = 8; // Fallback
+            boss.layer = enemyLayer;
+            boss.tag = "Enemy";
             
             Material mat = new Material(Shader.Find("Standard"));
             mat.color = new Color(0.8f, 0.1f, 0.1f);

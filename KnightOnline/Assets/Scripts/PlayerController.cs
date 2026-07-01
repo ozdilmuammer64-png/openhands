@@ -147,6 +147,8 @@ namespace KnightOnline
                 skillSystem = gameObject.AddComponent<SkillSystem>();
             }
             skillSystem.player = this;
+            skillSystem.enemyLayer = enemyLayer; // Enemy layer'ı ata
+            skillSystem.learnedSkills.Clear(); // Temizle
             
             // Varsayılan yetenekler
             for (int i = 0; i < 9; i++)
@@ -157,22 +159,60 @@ namespace KnightOnline
                 skill.baseDamage = 10 + (i * 8);
                 skill.cooldown = 2f;
                 skill.skillType = SkillType.Active;
+                skill.range = 5f;
+                skill.targetType = SkillTarget.SingleEnemy;
                 
                 switch (i)
                 {
-                    case 0: skill.skillName = "Power Strike"; break;
-                    case 1: skill.skillName = "Fireball"; skill.manaCost = 25; break;
-                    case 2: skill.skillName = "Heal"; skill.healAmount = 30; break;
-                    case 3: skill.skillName = "Shield"; skill.buffDuration = 5; break;
-                    case 4: skill.skillName = "Dash"; skill.manaCost = 15; break;
-                    case 5: skill.skillName = "Smite"; break;
-                    case 6: skill.skillName = "Frost"; break;
-                    case 7: skill.skillName = "Poison"; break;
-                    case 8: skill.skillName = "Ultimate"; skill.manaCost = 100; skill.baseDamage = 200; break;
+                    case 0: 
+                        skill.skillName = "Power Strike"; 
+                        skill.baseDamage = 50;
+                        skill.cooldown = 1f;
+                        break;
+                    case 1: 
+                        skill.skillName = "Fireball"; 
+                        skill.manaCost = 25; 
+                        skill.baseDamage = 80;
+                        break;
+                    case 2: 
+                        skill.skillName = "Heal"; 
+                        skill.healAmount = 50; 
+                        skill.targetType = SkillTarget.Self;
+                        break;
+                    case 3: 
+                        skill.skillName = "Shield"; 
+                        skill.buffDuration = 10; 
+                        skill.buffDamageReduction = 0.3f;
+                        skill.targetType = SkillTarget.Self;
+                        break;
+                    case 4: 
+                        skill.skillName = "Dash"; 
+                        skill.manaCost = 15; 
+                        break;
+                    case 5: 
+                        skill.skillName = "Smite"; 
+                        skill.baseDamage = 100;
+                        break;
+                    case 6: 
+                        skill.skillName = "Frost"; 
+                        skill.baseDamage = 40;
+                        break;
+                    case 7: 
+                        skill.skillName = "Poison"; 
+                        skill.baseDamage = 30;
+                        break;
+                    case 8: 
+                        skill.skillName = "Ultimate"; 
+                        skill.manaCost = 100; 
+                        skill.baseDamage = 300; 
+                        skill.cooldown = 15f;
+                        break;
                 }
                 
                 skillSystem.learnedSkills.Add(new LearnedSkill { data = skill, currentCooldown = 0 });
             }
+            
+            Debug.Log($"✅ {skillSystem.learnedSkills.Count} yetenek yüklendi!");
         }
         
         enum DefaultSkills
