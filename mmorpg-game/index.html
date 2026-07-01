@@ -1,0 +1,2673 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚔️ Medieval Realm Online - MMORPG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            min-height: 100vh;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            color: #e8e8e8;
+        }
+
+        .pixel-font {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        /* ===== SCREENS ===== */
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            z-index: 1000;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* ===== MAIN MENU ===== */
+        #mainMenu {
+            flex-direction: column;
+            text-align: center;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%231a1a2e"/><circle cx="20" cy="20" r="2" fill="%23ffd700" opacity="0.5"/><circle cx="80" cy="30" r="1" fill="%23fff" opacity="0.3"/><circle cx="50" cy="70" r="1.5" fill="%234a90d9" opacity="0.4"/></svg>');
+        }
+
+        .menu-title {
+            font-size: 2.5rem;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 4px 4px 0 #8b4513;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .menu-subtitle {
+            font-size: 0.8rem;
+            color: #4a90d9;
+            margin-bottom: 60px;
+            letter-spacing: 2px;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 4px 4px 0 #8b4513; }
+            to { text-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 4px 4px 0 #8b4513; }
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .menu-btn {
+            padding: 15px 50px;
+            font-size: 1rem;
+            background: linear-gradient(180deg, #4a90d9 0%, #2d5a87 100%);
+            border: 3px solid #ffd700;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            background: linear-gradient(180deg, #5aa0e9 0%, #3d6a97 100%);
+        }
+
+        .menu-btn:active {
+            transform: scale(0.98);
+        }
+
+        .menu-btn.secondary {
+            background: linear-gradient(180deg, #555 0%, #333 100%);
+            border-color: #888;
+            font-size: 0.7rem;
+        }
+
+        /* ===== CHARACTER CREATION ===== */
+        #characterCreation {
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .creation-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 4px solid #4a90d9;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .creation-title {
+            font-size: 1.5rem;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .creation-section {
+            margin-bottom: 25px;
+        }
+
+        .creation-section h3 {
+            color: #4a90d9;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .race-grid, .class-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .race-option, .class-option {
+            background: #2d2d2d;
+            border: 3px solid #444;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 5px;
+        }
+
+        .race-option:hover, .class-option:hover {
+            border-color: #4a90d9;
+        }
+
+        .race-option.selected, .class-option.selected {
+            border-color: #ffd700;
+            background: rgba(74, 144, 217, 0.3);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .race-icon, .class-icon {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+
+        .race-name, .class-name {
+            font-size: 0.7rem;
+            color: #fff;
+        }
+
+        .race-desc {
+            font-size: 0.6rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .stat-inputs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .stat-input-group {
+            text-align: center;
+        }
+
+        .stat-input-group label {
+            display: block;
+            font-size: 0.7rem;
+            color: #4a90d9;
+            margin-bottom: 5px;
+        }
+
+        .stat-input-group input {
+            width: 60px;
+            padding: 8px;
+            text-align: center;
+            background: #1a1a2e;
+            border: 2px solid #4a90d9;
+            color: #fff;
+            font-size: 1rem;
+            border-radius: 5px;
+        }
+
+        .stat-points {
+            text-align: center;
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 0.8rem;
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a2e;
+            border: 2px solid #4a90d9;
+            color: #fff;
+            font-size: 1rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .name-input::placeholder {
+            color: #666;
+        }
+
+        .create-char-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1rem;
+            background: linear-gradient(180deg, #27ae60 0%, #1e8449 100%);
+            border: 3px solid #ffd700;
+            color: #fff;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            margin-top: 20px;
+        }
+
+        .create-char-btn:disabled {
+            background: #555;
+            border-color: #888;
+            cursor: not-allowed;
+        }
+
+        .create-char-btn:hover:not(:disabled) {
+            box-shadow: 0 0 20px rgba(39, 174, 96, 0.5);
+        }
+
+        /* ===== GAME SCREEN ===== */
+        #gameScreen {
+            display: none;
+            padding: 0;
+        }
+
+        #gameCanvas {
+            display: block;
+            background: #2d5016;
+        }
+
+        /* ===== HUD ===== */
+        #hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        #hud > * {
+            pointer-events: auto;
+        }
+
+        .health-bar-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 250px;
+        }
+
+        .bar-label {
+            font-size: 0.6rem;
+            color: #fff;
+            margin-bottom: 3px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bar-outer {
+            width: 100%;
+            height: 20px;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .bar-inner {
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .health-bar {
+            background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .mana-bar {
+            background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+        }
+
+        .xp-bar {
+            background: linear-gradient(180deg, #f1c40f 0%, #d4ac0d 100%);
+        }
+
+        .bar-container {
+            margin-bottom: 8px;
+        }
+
+        .player-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            text-align: right;
+        }
+
+        .player-level {
+            font-size: 0.8rem;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .player-class {
+            font-size: 0.6rem;
+            color: #4a90d9;
+        }
+
+        .gold-display {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            font-size: 0.8rem;
+            color: #ffd700;
+        }
+
+        /* ===== SKILL BAR ===== */
+        .skill-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #444;
+        }
+
+        .skill-slot {
+            width: 60px;
+            height: 60px;
+            background: #2d2d2d;
+            border: 2px solid #555;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .skill-slot:hover {
+            border-color: #4a90d9;
+            transform: translateY(-3px);
+        }
+
+        .skill-slot.on-cooldown {
+            opacity: 0.5;
+        }
+
+        .skill-slot .key-hint {
+            position: absolute;
+            bottom: 2px;
+            right: 3px;
+            font-size: 0.5rem;
+            color: #888;
+        }
+
+        .skill-slot .skill-icon {
+            font-size: 1.5rem;
+        }
+
+        .skill-slot .skill-name {
+            font-size: 0.4rem;
+            color: #aaa;
+            margin-top: 2px;
+        }
+
+        .cooldown-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #fff;
+            border-radius: 3px;
+        }
+
+        /* ===== INVENTORY ===== */
+        .inventory-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 30, 0.95);
+            border: 3px solid #4a90d9;
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+            z-index: 200;
+            min-width: 500px;
+        }
+
+        .inventory-panel.open {
+            display: block;
+        }
+
+        .inventory-title {
+            font-size: 1rem;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 50px);
+            gap: 5px;
+        }
+
+        .inv-slot {
+            width: 50px;
+            height: 50px;
+            background: #2d2d2d;
+            border: 2px solid #444;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .inv-slot:hover {
+            border-color: #4a90d9;
+        }
+
+        .inv-slot.equipped {
+            border-color: #ffd700;
+            background: rgba(74, 144, 217, 0.2);
+        }
+
+        .item-count {
+            position: absolute;
+            bottom: 2px;
+            right: 3px;
+            font-size: 0.5rem;
+            color: #fff;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .inventory-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .inv-tab {
+            padding: 8px 20px;
+            background: #2d2d2d;
+            border: 2px solid #444;
+            color: #888;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 0.7rem;
+        }
+
+        .inv-tab.active {
+            border-color: #4a90d9;
+            color: #fff;
+        }
+
+        .equipment-section {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #333;
+        }
+
+        .equip-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 50px);
+            gap: 5px;
+        }
+
+        .equip-slot {
+            width: 50px;
+            height: 50px;
+            background: #1a1a2e;
+            border: 2px solid #555;
+            border-radius: 3px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.5rem;
+            color: #666;
+        }
+
+        .equip-slot.equipped {
+            border-color: #ffd700;
+            background: rgba(74, 144, 217, 0.2);
+            color: #fff;
+        }
+
+        .equip-slot .slot-icon {
+            font-size: 1.3rem;
+        }
+
+        .player-stats {
+            flex: 1;
+            padding-left: 15px;
+            border-left: 2px solid #333;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.7rem;
+        }
+
+        .stat-row .stat-name {
+            color: #888;
+        }
+
+        .stat-row .stat-value {
+            color: #4a90d9;
+        }
+
+        /* ===== SHOP ===== */
+        .shop-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 30, 0.95);
+            border: 3px solid #ffd700;
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+            z-index: 200;
+            min-width: 600px;
+        }
+
+        .shop-panel.open {
+            display: block;
+        }
+
+        .shop-title {
+            font-size: 1rem;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .shop-item {
+            background: #2d2d2d;
+            border: 2px solid #444;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .shop-item:hover {
+            border-color: #4a90d9;
+        }
+
+        .shop-item-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .shop-item-name {
+            font-size: 0.6rem;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+
+        .shop-item-price {
+            font-size: 0.5rem;
+            color: #ffd700;
+        }
+
+        .shop-item-stat {
+            font-size: 0.5rem;
+            color: #27ae60;
+        }
+
+        /* ===== NPC DIALOG ===== */
+        .dialog-panel {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 20, 30, 0.95);
+            border: 3px solid #4a90d9;
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+            z-index: 200;
+            min-width: 400px;
+            text-align: center;
+        }
+
+        .dialog-panel.open {
+            display: block;
+        }
+
+        .dialog-npc-name {
+            font-size: 0.8rem;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .dialog-text {
+            font-size: 0.8rem;
+            color: #e8e8e8;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .dialog-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .dialog-btn {
+            padding: 8px 20px;
+            background: #4a90d9;
+            border: 2px solid #ffd700;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 0.7rem;
+        }
+
+        .dialog-btn:hover {
+            background: #5aa0e9;
+        }
+
+        /* ===== MINIMAP ===== */
+        .minimap {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            width: 150px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #444;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #minimapCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ===== DAMAGE NUMBERS ===== */
+        .damage-number {
+            position: fixed;
+            font-size: 1rem;
+            font-weight: bold;
+            pointer-events: none;
+            animation: damageFloat 1s ease-out forwards;
+            z-index: 300;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .damage-number.crit {
+            color: #ff6b6b;
+            font-size: 1.3rem;
+        }
+
+        .damage-number.normal {
+            color: #fff;
+        }
+
+        .damage-number.heal {
+            color: #2ecc71;
+        }
+
+        @keyframes damageFloat {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            50% { opacity: 1; transform: translateY(-30px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
+        }
+
+        /* ===== NOTIFICATIONS ===== */
+        .notification {
+            position: fixed;
+            top: 150px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-left: 4px solid #4a90d9;
+            padding: 10px 15px;
+            border-radius: 5px;
+            animation: slideIn 0.3s ease-out;
+            z-index: 200;
+            max-width: 300px;
+        }
+
+        .notification.levelup {
+            border-left-color: #ffd700;
+        }
+
+        .notification.item {
+            border-left-color: #9b59b6;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ===== PAUSE MENU ===== */
+        .pause-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 500;
+        }
+
+        .pause-menu.open {
+            display: flex;
+        }
+
+        .pause-content {
+            text-align: center;
+        }
+
+        .pause-title {
+            font-size: 2rem;
+            color: #ffd700;
+            margin-bottom: 30px;
+        }
+
+        /* ===== DEATH SCREEN ===== */
+        .death-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(139, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 600;
+        }
+
+        .death-screen.open {
+            display: flex;
+        }
+
+        .death-content {
+            text-align: center;
+        }
+
+        .death-title {
+            font-size: 3rem;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .death-info {
+            font-size: 1rem;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+
+        /* ===== CONTROLS HINT ===== */
+        .controls-hint {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            font-size: 0.5rem;
+            color: #666;
+            text-align: right;
+            line-height: 1.8;
+        }
+
+        /* ===== AREA NAME ===== */
+        .area-name {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 150;
+        }
+
+        .area-name.show {
+            animation: areaNameFade 3s ease-out;
+        }
+
+        @keyframes areaNameFade {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* ===== LOOT POPUP ===== */
+        .loot-popup {
+            position: fixed;
+            top: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(155, 89, 182, 0.9);
+            border: 2px solid #9b59b6;
+            padding: 15px 25px;
+            border-radius: 10px;
+            display: none;
+            z-index: 250;
+        }
+
+        .loot-popup.open {
+            display: block;
+            animation: popupBounce 0.5s ease-out;
+        }
+
+        @keyframes popupBounce {
+            0% { transform: translateX(-50%) scale(0); }
+            50% { transform: translateX(-50%) scale(1.1); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+
+        .loot-title {
+            font-size: 0.8rem;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .loot-items {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .loot-item {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .loot-item-icon {
+            font-size: 1.5rem;
+        }
+
+        .loot-item-name {
+            font-size: 0.5rem;
+            color: #fff;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a90d9;
+            border-radius: 4px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .menu-title {
+                font-size: 1.5rem;
+            }
+
+            .creation-container {
+                padding: 15px;
+            }
+
+            .race-grid, .class-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .inventory-panel, .shop-panel {
+                min-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- MAIN MENU -->
+    <div id="mainMenu" class="screen active">
+        <h1 class="menu-title pixel-font">⚔️ MEDIEVAL REALM</h1>
+        <p class="menu-subtitle pixel-font">ONLINE</p>
+        <div class="menu-buttons">
+            <button class="menu-btn" onclick="startNewGame()">▶ YENİ OYUN</button>
+            <button class="menu-btn secondary" onclick="loadGame()">📂 DEVAM ET</button>
+        </div>
+    </div>
+
+    <!-- CHARACTER CREATION -->
+    <div id="characterCreation" class="screen">
+        <div class="creation-container">
+            <h2 class="creation-title pixel-font">⚔️ KARAKTER OLUŞTUR</h2>
+            
+            <div class="creation-section">
+                <h3 class="pixel-font">IRK SEÇ</h3>
+                <div class="race-grid" id="raceGrid">
+                    <div class="race-option" data-race="human" onclick="selectRace('human')">
+                        <div class="race-icon">🧑</div>
+                        <div class="race-name">İNSAN</div>
+                        <div class="race-desc">Dengeli</div>
+                    </div>
+                    <div class="race-option" data-race="orc" onclick="selectRace('orc')">
+                        <div class="race-icon">👹</div>
+                        <div class="race-name">ORK</div>
+                        <div class="race-desc">Güçlü</div>
+                    </div>
+                    <div class="race-option" data-race="elf" onclick="selectRace('elf')">
+                        <div class="race-icon">🧝</div>
+                        <div class="race-name">ELF</div>
+                        <div class="race-desc">Çevik</div>
+                    </div>
+                    <div class="race-option" data-race="demon" onclick="selectRace('demon')">
+                        <div class="race-icon">😈</div>
+                        <div class="race-name">ŞEYTAN</div>
+                        <div class="race-desc">Büyülü</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="creation-section">
+                <h3 class="pixel-font">SINIF SEÇ</h3>
+                <div class="class-grid" id="classGrid">
+                    <div class="class-option" data-class="warrior" onclick="selectClass('warrior')">
+                        <div class="class-icon">⚔️</div>
+                        <div class="class-name">SAVAŞÇI</div>
+                        <div class="race-desc">Yakın dövüş</div>
+                    </div>
+                    <div class="class-option" data-class="mage" onclick="selectClass('mage')">
+                        <div class="class-icon">🔮</div>
+                        <div class="class-name">BÜYÜCÜ</div>
+                        <div class="race-desc">Uzaktan saldırı</div>
+                    </div>
+                    <div class="class-option" data-class="rogue" onclick="selectClass('rogue')">
+                        <div class="class-icon">🗡️</div>
+                        <div class="class-name">SUBAŞI</div>
+                        <div class="race-desc">Hızlı & Gizli</div>
+                    </div>
+                    <div class="class-option" data-class="paladin" onclick="selectClass('paladin')">
+                        <div class="class-icon">🛡️</div>
+                        <div class="class-name">PALADİN</div>
+                        <div class="race-desc">Tank & Healer</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="creation-section">
+                <h3 class="pixel-font">ÖZELLİKLER</h3>
+                <p class="stat-points" id="statPoints">Kalan Puan: <span>10</span></p>
+                <div class="stat-inputs">
+                    <div class="stat-input-group">
+                        <label>Güç</label>
+                        <input type="number" id="statStr" value="10" min="1" max="20" onchange="updateStats()">
+                    </div>
+                    <div class="stat-input-group">
+                        <label>Çeviklik</label>
+                        <input type="number" id="statDex" value="10" min="1" max="20" onchange="updateStats()">
+                    </div>
+                    <div class="stat-input-group">
+                        <label>Zeka</label>
+                        <input type="number" id="statInt" value="10" min="1" max="20" onchange="updateStats()">
+                    </div>
+                    <div class="stat-input-group">
+                        <label>Dayanıklılık</label>
+                        <input type="number" id="statVit" value="10" min="1" max="20" onchange="updateStats()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="creation-section">
+                <h3 class="pixel-font">KARAKTER ADI</h3>
+                <input type="text" class="name-input" id="charName" placeholder="Karakter adını gir..." maxlength="15">
+            </div>
+
+            <button class="create-char-btn pixel-font" id="createBtn" onclick="createCharacter()" disabled>✓ KARAKTERİ OLUŞTUR</button>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="screen">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="hud">
+            <!-- Health & Mana -->
+            <div class="health-bar-container">
+                <div class="bar-container">
+                    <div class="bar-label">
+                        <span>❤️ CAN</span>
+                        <span id="healthText">100/100</span>
+                    </div>
+                    <div class="bar-outer">
+                        <div class="bar-inner health-bar" id="healthBar" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-label">
+                        <span>💙 MANA</span>
+                        <span id="manaText">50/50</span>
+                    </div>
+                    <div class="bar-outer">
+                        <div class="bar-inner mana-bar" id="manaBar" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-label">
+                        <span>⭐ TECRÜBE</span>
+                        <span id="xpText">0/100</span>
+                    </div>
+                    <div class="bar-outer">
+                        <div class="bar-inner xp-bar" id="xpBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Info -->
+            <div class="player-info">
+                <div class="player-level pixel-font" id="playerLevel">SEVİYE 1</div>
+                <div class="player-class" id="playerClass">SAVAŞÇI • İNSAN</div>
+            </div>
+
+            <div class="gold-display pixel-font" id="goldDisplay">💰 100</div>
+
+            <!-- Minimap -->
+            <div class="minimap">
+                <canvas id="minimapCanvas"></canvas>
+            </div>
+
+            <!-- Skill Bar -->
+            <div class="skill-bar" id="skillBar"></div>
+
+            <!-- Controls Hint -->
+            <div class="controls-hint">
+                WASD: Hareket<br>
+                Sol Tık: Saldırı<br>
+                1-4: Skilller<br>
+                I: Envanter<br>
+                ESC: Menü
+            </div>
+        </div>
+
+        <!-- Area Name -->
+        <div class="area-name pixel-font" id="areaName">KÖY</div>
+    </div>
+
+    <!-- INVENTORY PANEL -->
+    <div class="inventory-panel" id="inventoryPanel">
+        <h2 class="inventory-title pixel-font">🎒 ENVANTER</h2>
+        
+        <div class="inventory-tabs">
+            <button class="inv-tab active" onclick="showInventoryTab('inventory')">Envanter</button>
+            <button class="inv-tab" onclick="showInventoryTab('equipment')">Ekipman</button>
+            <button class="inv-tab" onclick="showInventoryTab('stats')">İstatistikler</button>
+        </div>
+
+        <div id="invInventory" class="inventory-grid"></div>
+        <div id="invEquipment" class="equipment-section" style="display: none;"></div>
+        <div id="invStats" class="player-stats" style="display: none;"></div>
+    </div>
+
+    <!-- SHOP PANEL -->
+    <div class="shop-panel" id="shopPanel">
+        <h2 class="shop-title pixel-font">🏪 DÜKKAN</h2>
+        <div class="shop-grid" id="shopGrid"></div>
+        <button class="dialog-btn" onclick="closeShop()" style="margin-top: 15px; width: 100%;">KAPAT</button>
+    </div>
+
+    <!-- DIALOG PANEL -->
+    <div class="dialog-panel" id="dialogPanel">
+        <div class="dialog-npc-name pixel-font" id="npcName">NPC</div>
+        <div class="dialog-text" id="dialogText">Merhaba, gezgin!</div>
+        <div class="dialog-options" id="dialogOptions"></div>
+    </div>
+
+    <!-- LOOT POPUP -->
+    <div class="loot-popup" id="lootPopup">
+        <div class="loot-title pixel-font">🎁 EŞYA BULUNDU!</div>
+        <div class="loot-items" id="lootItems"></div>
+    </div>
+
+    <!-- PAUSE MENU -->
+    <div class="pause-menu" id="pauseMenu">
+        <div class="pause-content">
+            <h2 class="pause-title pixel-font">⏸️ DURAKLATILDI</h2>
+            <div class="menu-buttons">
+                <button class="menu-btn" onclick="resumeGame()">▶ DEVAM ET</button>
+                <button class="menu-btn secondary" onclick="saveGame()">💾 KAYDET</button>
+                <button class="menu-btn secondary" onclick="quitToMenu()">🚪 ÇIKIŞ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DEATH SCREEN -->
+    <div class="death-screen" id="deathScreen">
+        <div class="death-content">
+            <h2 class="death-title pixel-font">☠️ ÖLDÜN!</h2>
+            <p class="death-info">Seviyen düştü ve altınını kaybettin...</p>
+            <button class="menu-btn" onclick="respawn()">💫 YENİDEN DOĞ</button>
+        </div>
+    </div>
+
+    <script>
+    // ==================== GAME DATA ====================
+    const GAME_DATA = {
+        races: {
+            human: { name: 'İnsan', str: 0, dex: 0, int: 0, vit: 0, color: '#f5d0c5' },
+            orc: { name: 'Ork', str: 3, dex: -1, int: -1, vit: 2, color: '#7cb342' },
+            elf: { name: 'Elf', str: -1, dex: 3, int: 1, vit: -1, color: '#e1bee7' },
+            demon: { name: 'Şeytan', str: 1, dex: 1, int: 3, vit: -2, color: '#ef5350' }
+        },
+        classes: {
+            warrior: {
+                name: 'Savaşçı',
+                icon: '⚔️',
+                baseHP: 150,
+                baseMP: 30,
+                baseAD: 15,
+                baseAP: 5,
+                skills: ['smite', 'charge', 'whirlwind', 'execute']
+            },
+            mage: {
+                name: 'Büyücü',
+                icon: '🔮',
+                baseHP: 80,
+                baseMP: 100,
+                baseAD: 5,
+                baseAP: 25,
+                skills: ['fireball', 'frostbolt', 'arcaneintellect', 'pyroblast']
+            },
+            rogue: {
+                name: 'Subaşı',
+                icon: '🗡️',
+                baseHP: 100,
+                baseMP: 40,
+                baseAD: 20,
+                baseAP: 8,
+                skills: ['ambush', 'stealth', 'poison', 'eviscerate']
+            },
+            paladin: {
+                name: 'Paladin',
+                icon: '🛡️',
+                baseHP: 130,
+                baseMP: 60,
+                baseAD: 12,
+                baseAP: 12,
+                skills: ['holybolt', 'divineShield', 'heal', 'judgment']
+            }
+        },
+        skills: {
+            // Warrior
+            smite: { name: 'Smite', icon: '⚡', mana: 10, cooldown: 2000, damage: 20, type: 'damage' },
+            charge: { name: 'Şarj', icon: '🏃', mana: 15, cooldown: 3000, damage: 30, type: 'dash' },
+            whirlwind: { name: 'Girdap', icon: '🌀', mana: 25, cooldown: 5000, damage: 40, type: 'aoe' },
+            execute: { name: 'İdam', icon: '💀', mana: 30, cooldown: 8000, damage: 80, type: 'damage' },
+            // Mage
+            fireball: { name: 'Ateş Topu', icon: '🔥', mana: 15, cooldown: 2000, damage: 35, type: 'projectile' },
+            frostbolt: { name: 'Buz Şimşeği', icon: '❄️', mana: 12, cooldown: 1500, damage: 25, type: 'projectile' },
+            arcaneintellect: { name: 'Büyü Gücü', icon: '✨', mana: 20, cooldown: 10000, damage: 0, type: 'buff' },
+            pyroblast: { name: 'Piroblast', icon: '💥', mana: 40, cooldown: 10000, damage: 100, type: 'projectile' },
+            // Rogue
+            ambush: { name: 'Pusu', icon: '👁️', mana: 15, cooldown: 3000, damage: 50, type: 'damage' },
+            stealth: { name: 'Gizlilik', icon: '👻', mana: 20, cooldown: 15000, damage: 0, type: 'buff' },
+            poison: { name: 'Zehir', icon: '☠️', mana: 10, cooldown: 5000, damage: 15, type: 'dot' },
+            eviscerate: { name: 'Parçalama', icon: '🗡️', mana: 25, cooldown: 4000, damage: 60, type: 'damage' },
+            // Paladin
+            holybolt: { name: 'Kutsal Şimşek', icon: '⚡', mana: 15, cooldown: 2000, damage: 25, type: 'damage' },
+            divineShield: { name: 'İlahi Kalkan', icon: '🛡️', mana: 30, cooldown: 20000, damage: 0, type: 'shield' },
+            heal: { name: 'Şifa', icon: '💚', mana: 25, cooldown: 5000, damage: -40, type: 'heal' },
+            judgment: { name: 'Yargılama', icon: '⚖️', mana: 35, cooldown: 8000, damage: 70, type: 'damage' }
+        },
+        enemies: {
+            slime: { name: 'Balçık', icon: '🟢', hp: 30, ad: 5, xp: 15, gold: 5, color: '#4caf50', level: 1 },
+            goblin: { name: 'Kobold', icon: '👺', hp: 50, ad: 10, xp: 25, gold: 10, color: '#8bc34a', level: 3 },
+            skeleton: { name: 'İskelet', icon: '💀', hp: 70, ad: 15, xp: 40, gold: 15, color: '#bdbdbd', level: 5 },
+            orc: { name: 'Vahşi Ork', icon: '👹', hp: 100, ad: 20, xp: 60, gold: 25, color: '#689f38', level: 8 },
+            wolf: { name: 'Kurt', icon: '🐺', hp: 80, ad: 18, xp: 50, gold: 20, color: '#607d8b', level: 6 },
+            troll: { name: 'Mağara Trollü', icon: '🧌', hp: 150, ad: 25, xp: 80, gold: 35, color: '#795548', level: 10 },
+            darkknight: { name: 'Kara Şövalye', icon: '🖤', hp: 200, ad: 30, xp: 120, gold: 50, color: '#424242', level: 15 },
+            dragon: { name: 'Genç Ejderha', icon: '🐉', hp: 500, ad: 50, xp: 300, gold: 200, color: '#e53935', level: 25 }
+        },
+        items: {
+            sword: { name: 'Kılıç', icon: '⚔️', slot: 'weapon', ad: 5, quality: 'normal' },
+            staff: { name: 'Asa', icon: '🪄', slot: 'weapon', ap: 8, quality: 'normal' },
+            dagger: { name: 'Hançer', icon: '🗡️', slot: 'weapon', ad: 3, crit: 5, quality: 'normal' },
+            helmet: { name: 'Miğfer', icon: '⛑️', slot: 'head', hp: 20, quality: 'normal' },
+            armor: { name: 'Zırh', icon: '🦺', slot: 'body', hp: 40, quality: 'normal' },
+            boots: { name: 'Bot', icon: '👢', slot: 'feet', dex: 2, quality: 'normal' },
+            ring: { name: 'Yüzük', icon: '💍', slot: 'ring', mp: 10, quality: 'normal' },
+            potion_health: { name: 'Can İksiri', icon: '❤️', type: 'consumable', hp: 50, stack: 5 },
+            potion_mana: { name: 'Mana İksiri', icon: '💙', type: 'consumable', mp: 30, stack: 5 },
+            iron_sword: { name: 'Demir Kılıç', icon: '🗡️', slot: 'weapon', ad: 12, quality: 'rare' },
+            mage_robe: { name: 'Büyücü Robu', icon: '👘', slot: 'body', mp: 30, int: 3, quality: 'rare' },
+            golden_ring: { name: 'Altın Yüzük', icon: '💍', slot: 'ring', all: 5, quality: 'epic' },
+            dragon_slayer: { name: 'Ejderha Katili', icon: '⚔️', slot: 'weapon', ad: 30, crit: 10, quality: 'legendary' }
+        },
+        areas: {
+            village: { name: 'Köy', safe: true, color: '#8d6e63', enemies: [] },
+            forest: { name: 'Orman', safe: false, color: '#2e7d32', enemies: ['slime', 'wolf'] },
+            dungeon_entrance: { name: 'Zindan Girişi', safe: false, color: '#5d4037', enemies: ['skeleton', 'goblin'] },
+            mountain: { name: 'Dağ', safe: false, color: '#78909c', enemies: ['orc', 'troll'] },
+            dark_forest: { name: 'Karanlık Orman', safe: false, color: '#1b5e20', enemies: ['darkknight', 'dragon'] }
+        }
+    };
+
+    // ==================== GAME STATE ====================
+    let gameState = {
+        screen: 'menu',
+        player: null,
+        enemies: [],
+        projectiles: [],
+        particles: [],
+        items: [],
+        npcs: [],
+        currentArea: 'village',
+        keys: {},
+        mouse: { x: 0, y: 0, down: false },
+        camera: { x: 0, y: 0 },
+        paused: false,
+        selectedSkill: null,
+        skillCooldowns: {},
+        lootTimeout: null
+    };
+
+    let canvas, ctx, minimapCanvas, minimapCtx;
+    let lastTime = 0;
+    let animationFrame;
+
+    // ==================== INITIALIZATION ====================
+    function init() {
+        canvas = document.getElementById('gameCanvas');
+        ctx = canvas.getContext('2d');
+        minimapCanvas = document.getElementById('minimapCanvas');
+        minimapCtx = minimapCanvas.getContext('2d');
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Input handlers
+        window.addEventListener('keydown', e => {
+            gameState.keys[e.key.toLowerCase()] = true;
+            handleKeyPress(e);
+        });
+        window.addEventListener('keyup', e => gameState.keys[e.key.toLowerCase()] = false);
+        
+        canvas.addEventListener('mousemove', e => {
+            const rect = canvas.getBoundingClientRect();
+            gameState.mouse.x = e.clientX - rect.left + gameState.camera.x;
+            gameState.mouse.y = e.clientY - rect.top + gameState.camera.y;
+        });
+        
+        canvas.addEventListener('mousedown', e => {
+            if (e.button === 0) {
+                gameState.mouse.down = true;
+                handleMouseClick();
+            }
+        });
+        canvas.addEventListener('mouseup', e => {
+            if (e.button === 0) gameState.mouse.down = false;
+        });
+
+        // Check for saved game
+        checkSavedGame();
+    }
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        minimapCanvas.width = 150;
+        minimapCanvas.height = 150;
+    }
+
+    function checkSavedGame() {
+        const saved = localStorage.getItem('medievalRealmSave');
+        if (saved) {
+            document.querySelector('.menu-btn.secondary').style.display = 'block';
+        } else {
+            document.querySelector('.menu-btn.secondary').style.display = 'none';
+        }
+    }
+
+    // ==================== MENU FUNCTIONS ====================
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        gameState.screen = screenId;
+    }
+
+    function startNewGame() {
+        showScreen('characterCreation');
+    }
+
+    function loadGame() {
+        const saved = localStorage.getItem('medievalRealmSave');
+        if (saved) {
+            const data = JSON.parse(saved);
+            gameState.player = data.player;
+            gameState.currentArea = data.currentArea;
+            initGameWorld();
+            showScreen('gameScreen');
+            startGameLoop();
+            showAreaName(gameState.currentArea);
+        }
+    }
+
+    // ==================== CHARACTER CREATION ====================
+    let selectedRace = null;
+    let selectedClass = null;
+
+    function selectRace(race) {
+        selectedRace = race;
+        document.querySelectorAll('.race-option').forEach(el => el.classList.remove('selected'));
+        document.querySelector(`[data-race="${race}"]`).classList.add('selected');
+        updateCreateButton();
+    }
+
+    function selectClass(cls) {
+        selectedClass = cls;
+        document.querySelectorAll('.class-option').forEach(el => el.classList.remove('selected'));
+        document.querySelector(`[data-class="${cls}"]`).classList.add('selected');
+        updateCreateButton();
+    }
+
+    let availablePoints = 10;
+
+    function updateStats() {
+        const str = parseInt(document.getElementById('statStr').value) || 10;
+        const dex = parseInt(document.getElementById('statDex').value) || 10;
+        const int = parseInt(document.getElementById('statInt').value) || 10;
+        const vit = parseInt(document.getElementById('statVit').value) || 10;
+        
+        const total = str + dex + int + vit;
+        availablePoints = 40 - total;
+        
+        document.querySelector('#statPoints span').textContent = availablePoints;
+        
+        if (availablePoints < 0) {
+            document.getElementById('statStr').value = Math.min(str, 20);
+            document.getElementById('statDex').value = Math.min(dex, 20);
+            document.getElementById('statInt').value = Math.min(int, 20);
+            document.getElementById('statVit').value = Math.min(vit, 20);
+        }
+        
+        updateCreateButton();
+    }
+
+    function updateCreateButton() {
+        const name = document.getElementById('charName').value.trim();
+        const btn = document.getElementById('createBtn');
+        btn.disabled = !(selectedRace && selectedClass && name.length >= 2 && availablePoints >= 0);
+    }
+
+    document.getElementById('charName').addEventListener('input', updateCreateButton);
+
+    function createCharacter() {
+        const name = document.getElementById('charName').value.trim();
+        const raceData = GAME_DATA.races[selectedRace];
+        const classData = GAME_DATA.classes[selectedClass];
+        
+        const str = parseInt(document.getElementById('statStr').value) + raceData.str;
+        const dex = parseInt(document.getElementById('statDex').value) + raceData.dex;
+        const int = parseInt(document.getElementById('statInt').value) + raceData.int;
+        const vit = parseInt(document.getElementById('statVit').value) + raceData.vit;
+
+        gameState.player = {
+            name: name,
+            race: selectedRace,
+            class: selectedClass,
+            level: 1,
+            xp: 0,
+            xpToLevel: 100,
+            hp: classData.baseHP + (vit * 10),
+            maxHp: classData.baseHP + (vit * 10),
+            mp: classData.baseMP + (int * 3),
+            maxMp: classData.baseMP + (int * 3),
+            ad: classData.baseAD + (str * 2),
+            ap: classData.baseAP + (int * 2),
+            str: Math.max(1, str),
+            dex: Math.max(1, dex),
+            int: Math.max(1, int),
+            vit: Math.max(1, vit),
+            gold: 100,
+            x: 400,
+            y: 400,
+            speed: 3 + (dex * 0.1),
+            crit: 5 + (dex * 0.5),
+            inventory: Array(24).fill(null),
+            equipment: {
+                head: null,
+                body: null,
+                feet: null,
+                weapon: null,
+                ring: null
+            },
+            skills: classData.skills.map(s => ({
+                ...GAME_DATA.skills[s],
+                id: s,
+                level: 1
+            }))
+        };
+
+        // Give starting items
+        gameState.player.inventory[0] = { ...GAME_DATA.items.potion_health };
+        gameState.player.inventory[0].count = 3;
+        gameState.player.inventory[1] = { ...GAME_DATA.items.potion_mana };
+        gameState.player.inventory[1].count = 3;
+
+        initGameWorld();
+        showScreen('gameScreen');
+        startGameLoop();
+        showAreaName('village');
+    }
+
+    // ==================== GAME WORLD ====================
+    function initGameWorld() {
+        gameState.currentArea = 'village';
+        spawnEnemies();
+        spawnNPCs();
+        createSkillBar();
+    }
+
+    function spawnEnemies() {
+        gameState.enemies = [];
+        const area = GAME_DATA.areas[gameState.currentArea];
+        
+        if (area.enemies.length > 0) {
+            for (let i = 0; i < 8; i++) {
+                const enemyType = area.enemies[Math.floor(Math.random() * area.enemies.length)];
+                const template = GAME_DATA.enemies[enemyType];
+                
+                gameState.enemies.push({
+                    ...template,
+                    id: 'enemy_' + i,
+                    type: enemyType,
+                    x: Math.random() * 800 + 100,
+                    y: Math.random() * 600 + 100,
+                    currentHp: template.hp,
+                    target: null,
+                    state: 'patrol',
+                    patrolDir: 1,
+                    lastAttack: 0
+                });
+            }
+        }
+    }
+
+    function spawnNPCs() {
+        gameState.npcs = [
+            {
+                id: 'npc_merchant',
+                name: 'Tüccar Ahmet',
+                icon: '🧔',
+                x: 350,
+                y: 350,
+                dialog: [
+                    { text: 'Merhaba, gezgin! Dükkanımı gezmek ister misin?', options: [
+                        { text: '🛒 Dükkanı göster', action: 'shop' },
+                        { text: '👋 Hoşçakal', action: 'close' }
+                    ]}
+                ]
+            },
+            {
+                id: 'npc_guildmaster',
+                name: 'Lonca Ustası',
+                icon: '👨‍🦳',
+                x: 450,
+                y: 350,
+                dialog: [
+                    { text: 'Genç savaşçı, lonca savaşları yaklaşıyor! Hazır mısın?', options: [
+                        { text: '✅ Lonca savaşına katıl', action: 'guildwar' },
+                        { text: '👋 Hoşçakal', action: 'close' }
+                    ]}
+                ]
+            },
+            {
+                id: 'npc_healer',
+                name: 'Şifacı Elena',
+                icon: '👩‍⚕️',
+                x: 400,
+                y: 450,
+                dialog: [
+                    { text: 'Yaralarını iyileştirmemi ister misin? Sadece 20 altın.', options: [
+                        { text: '💚 İyileştir (20 altın)', action: 'heal' },
+                        { text: '👋 Hayır, iyiyim', action: 'close' }
+                    ]}
+                ]
+            }
+        ];
+    }
+
+    function createSkillBar() {
+        const skillBar = document.getElementById('skillBar');
+        skillBar.innerHTML = '';
+        
+        gameState.player.skills.forEach((skill, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'skill-slot';
+            slot.innerHTML = `
+                <span class="skill-icon">${skill.icon}</span>
+                <span class="skill-name">${skill.name}</span>
+                <span class="key-hint">${index + 1}</span>
+            `;
+            slot.onclick = () => useSkill(index);
+            skillBar.appendChild(slot);
+        });
+    }
+
+    // ==================== GAME LOOP ====================
+    function startGameLoop() {
+        lastTime = performance.now();
+        gameLoop();
+    }
+
+    function gameLoop(currentTime = 0) {
+        const deltaTime = (currentTime - lastTime) / 1000;
+        lastTime = currentTime;
+
+        if (!gameState.paused) {
+            update(deltaTime);
+        }
+        render();
+
+        animationFrame = requestAnimationFrame(gameLoop);
+    }
+
+    function update(dt) {
+        if (!gameState.player || gameState.paused) return;
+
+        // Player movement
+        let dx = 0, dy = 0;
+        if (gameState.keys['w'] || gameState.keys['arrowup']) dy -= 1;
+        if (gameState.keys['s'] || gameState.keys['arrowdown']) dy += 1;
+        if (gameState.keys['a'] || gameState.keys['arrowleft']) dx -= 1;
+        if (gameState.keys['d'] || gameState.keys['arrowright']) dx += 1;
+
+        if (dx !== 0 || dy !== 0) {
+            const len = Math.sqrt(dx * dx + dy * dy);
+            dx /= len;
+            dy /= len;
+            
+            gameState.player.x += dx * gameState.player.speed;
+            gameState.player.y += dy * gameState.player.speed;
+            
+            // Bounds
+            gameState.player.x = Math.max(50, Math.min(850, gameState.player.x));
+            gameState.player.y = Math.max(50, Math.min(650, gameState.player.y));
+        }
+
+        // Camera follow
+        gameState.camera.x = gameState.player.x - canvas.width / 2;
+        gameState.camera.y = gameState.player.y - canvas.height / 2;
+        gameState.camera.x = Math.max(0, Math.min(900 - canvas.width, gameState.camera.x));
+        gameState.camera.y = Math.max(0, Math.min(700 - canvas.height, gameState.camera.y));
+
+        // Update enemies
+        updateEnemies(dt);
+
+        // Update projectiles
+        updateProjectiles(dt);
+
+        // Update particles
+        updateParticles(dt);
+
+        // Auto-regen
+        if (Math.random() < 0.02) {
+            gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + 1);
+        }
+        if (Math.random() < 0.03) {
+            gameState.player.mp = Math.min(gameState.player.maxMp, gameState.player.mp + 1);
+        }
+
+        // Check area transitions
+        checkAreaTransitions();
+
+        // Update HUD
+        updateHUD();
+
+        // Update minimap
+        updateMinimap();
+    }
+
+    function updateEnemies(dt) {
+        const area = GAME_DATA.areas[gameState.currentArea];
+        
+        gameState.enemies.forEach(enemy => {
+            const distToPlayer = Math.hypot(enemy.x - gameState.player.x, enemy.y - gameState.player.y);
+            
+            // AI behavior
+            if (distToPlayer < 200 && !area.safe) {
+                // Chase player
+                enemy.state = 'chase';
+                const angle = Math.atan2(gameState.player.y - enemy.y, gameState.player.x - enemy.x);
+                enemy.x += Math.cos(angle) * enemy.ad * 0.02;
+                enemy.y += Math.sin(angle) * enemy.ad * 0.02;
+                
+                // Attack
+                if (distToPlayer < 50 && Date.now() - enemy.lastAttack > 1000) {
+                    const damage = Math.max(1, enemy.ad - gameState.player.vit * 0.5);
+                    takeDamage(damage, enemy);
+                    enemy.lastAttack = Date.now();
+                }
+            } else {
+                // Patrol
+                enemy.state = 'patrol';
+                enemy.x += enemy.patrolDir * 0.5;
+                enemy.y += Math.sin(Date.now() / 1000) * 0.3;
+                
+                if (enemy.x < 100 || enemy.x > 800) {
+                    enemy.patrolDir *= -1;
+                }
+            }
+
+            // Check if dead
+            if (enemy.currentHp <= 0) {
+                handleEnemyDeath(enemy);
+            }
+        });
+
+        // Remove dead enemies
+        gameState.enemies = gameState.enemies.filter(e => e.currentHp > 0);
+    }
+
+    function updateProjectiles(dt) {
+        gameState.projectiles.forEach(proj => {
+            proj.x += proj.vx * 400 * dt;
+            proj.y += proj.vy * 400 * dt;
+            proj.life -= dt;
+
+            // Check collision with enemies
+            gameState.enemies.forEach(enemy => {
+                const dist = Math.hypot(enemy.x - proj.x, enemy.y - proj.y);
+                if (dist < 30) {
+                    const crit = Math.random() * 100 < gameState.player.crit;
+                    const damage = Math.floor((proj.damage + gameState.player.ap) * (crit ? 1.5 : 1));
+                    enemy.currentHp -= damage;
+                    showDamageNumber(enemy.x, enemy.y, damage, crit);
+                    createParticles(enemy.x, enemy.y, '#ff6b6b', 5);
+                    proj.life = 0;
+                }
+            });
+
+            // Check bounds
+            if (proj.x < 0 || proj.x > 900 || proj.y < 0 || proj.y > 700 || proj.life <= 0) {
+                proj.life = 0;
+            }
+        });
+
+        gameState.projectiles = gameState.projectiles.filter(p => p.life > 0);
+    }
+
+    function updateParticles(dt) {
+        gameState.particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= dt;
+            p.alpha = p.life / p.maxLife;
+        });
+
+        gameState.particles = gameState.particles.filter(p => p.life > 0);
+    }
+
+    function createParticles(x, y, color, count) {
+        for (let i = 0; i < count; i++) {
+            gameState.particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * 5,
+                vy: (Math.random() - 0.5) * 5,
+                color,
+                size: Math.random() * 4 + 2,
+                life: 0.5,
+                maxLife: 0.5,
+                alpha: 1
+            });
+        }
+    }
+
+    // ==================== COMBAT ====================
+    function handleMouseClick() {
+        if (!gameState.player || gameState.paused) return;
+
+        // Check if clicking on enemy
+        for (const enemy of gameState.enemies) {
+            const dist = Math.hypot(enemy.x - gameState.mouse.x, enemy.y - gameState.mouse.y);
+            if (dist < 40) {
+                basicAttack(enemy);
+                return;
+            }
+        }
+
+        // Check if clicking on NPC
+        for (const npc of gameState.npcs) {
+            const dist = Math.hypot(npc.x - gameState.mouse.x, npc.y - gameState.mouse.y);
+            if (dist < 40) {
+                openDialog(npc);
+                return;
+            }
+        }
+    }
+
+    function basicAttack(enemy) {
+        const crit = Math.random() * 100 < gameState.player.crit;
+        const damage = Math.floor((gameState.player.ad + getWeaponDamage()) * (crit ? 1.5 : 1));
+        enemy.currentHp -= damage;
+        showDamageNumber(enemy.x, enemy.y - 20, damage, crit);
+        createParticles(enemy.x, enemy.y, '#ff6b6b', 5);
+    }
+
+    function useSkill(index) {
+        if (!gameState.player || gameState.paused) return;
+        
+        const skill = gameState.player.skills[index];
+        if (!skill) return;
+
+        const cooldownKey = `skill_${index}`;
+        if (gameState.skillCooldowns[cooldownKey] && Date.now() - gameState.skillCooldowns[cooldownKey] < skill.cooldown) {
+            return;
+        }
+
+        if (gameState.player.mp < skill.mana) {
+            showNotification('Yeterli mana yok!', 'error');
+            return;
+        }
+
+        gameState.player.mp -= skill.mana;
+        gameState.skillCooldowns[cooldownKey] = Date.now();
+
+        // Find target (nearest enemy)
+        let target = null;
+        let minDist = Infinity;
+        for (const enemy of gameState.enemies) {
+            const dist = Math.hypot(enemy.x - gameState.player.x, enemy.y - gameState.player.y);
+            if (dist < minDist) {
+                minDist = dist;
+                target = enemy;
+            }
+        }
+
+        // Apply skill effect
+        switch (skill.type) {
+            case 'damage':
+            case 'dash':
+                if (target) {
+                    const damage = skill.damage + gameState.player.ap;
+                    target.currentHp -= damage;
+                    showDamageNumber(target.x, target.y - 20, damage, false);
+                    createParticles(target.x, target.y, '#ffd700', 10);
+                    
+                    if (skill.type === 'dash') {
+                        gameState.player.x = target.x;
+                        gameState.player.y = target.y;
+                    }
+                }
+                break;
+
+            case 'projectile':
+                const angle = target ? Math.atan2(target.y - gameState.player.y, target.x - gameState.player.x) : 0;
+                gameState.projectiles.push({
+                    x: gameState.player.x,
+                    y: gameState.player.y,
+                    vx: Math.cos(angle),
+                    vy: Math.sin(angle),
+                    damage: skill.damage,
+                    life: 2,
+                    color: skill.icon === '🔥' ? '#ff5722' : '#03a9f4'
+                });
+                break;
+
+            case 'aoe':
+                gameState.enemies.forEach(enemy => {
+                    const dist = Math.hypot(enemy.x - gameState.player.x, enemy.y - gameState.player.y);
+                    if (dist < 150) {
+                        enemy.currentHp -= skill.damage + gameState.player.ap;
+                        showDamageNumber(enemy.x, enemy.y - 20, skill.damage + gameState.player.ap, false);
+                    }
+                });
+                createParticles(gameState.player.x, gameState.player.y, '#ffd700', 20);
+                break;
+
+            case 'heal':
+                gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp - skill.damage);
+                showDamageNumber(gameState.player.x, gameState.player.y - 30, Math.abs(skill.damage), false, 'heal');
+                createParticles(gameState.player.x, gameState.player.y, '#4caf50', 10);
+                break;
+
+            case 'shield':
+                // TODO: Implement shield buff
+                showNotification('İlahi Kalkan aktif!', 'info');
+                break;
+
+            case 'buff':
+                gameState.player.ap += 10;
+                setTimeout(() => gameState.player.ap -= 10, 5000);
+                showNotification('Büyü Gücü +10!', 'info');
+                break;
+        }
+
+        updateSkillCooldownUI();
+    }
+
+    function updateSkillCooldownUI() {
+        const slots = document.querySelectorAll('.skill-slot');
+        slots.forEach((slot, index) => {
+            const cooldownKey = `skill_${index}`;
+            const skill = gameState.player.skills[index];
+            
+            if (gameState.skillCooldowns[cooldownKey]) {
+                const elapsed = Date.now() - gameState.skillCooldowns[cooldownKey];
+                if (elapsed < skill.cooldown) {
+                    slot.classList.add('on-cooldown');
+                    let overlay = slot.querySelector('.cooldown-overlay');
+                    if (!overlay) {
+                        overlay = document.createElement('div');
+                        overlay.className = 'cooldown-overlay';
+                        slot.appendChild(overlay);
+                    }
+                    overlay.textContent = Math.ceil((skill.cooldown - elapsed) / 1000);
+                } else {
+                    slot.classList.remove('on-cooldown');
+                    const overlay = slot.querySelector('.cooldown-overlay');
+                    if (overlay) overlay.remove();
+                }
+            }
+        });
+    }
+
+    function handleKeyPress(e) {
+        const key = e.key.toLowerCase();
+
+        // Number keys for skills
+        if (key >= '1' && key <= '4') {
+            useSkill(parseInt(key) - 1);
+        }
+
+        // Inventory
+        if (key === 'i') {
+            toggleInventory();
+        }
+
+        // Pause
+        if (key === 'escape') {
+            if (gameState.paused) {
+                resumeGame();
+            } else {
+                pauseGame();
+            }
+        }
+    }
+
+    function takeDamage(amount, source) {
+        const actualDamage = Math.max(1, amount);
+        gameState.player.hp -= actualDamage;
+        showDamageNumber(gameState.player.x, gameState.player.y - 30, actualDamage, false);
+        createParticles(gameState.player.x, gameState.player.y, '#e74c3c', 5);
+
+        if (gameState.player.hp <= 0) {
+            playerDeath();
+        }
+    }
+
+    function handleEnemyDeath(enemy) {
+        // Award XP
+        gameState.player.xp += enemy.xp;
+        showNotification(`+${enemy.xp} XP`, 'xp');
+        
+        // Award gold
+        gameState.player.gold += enemy.gold;
+        
+        // Check level up
+        checkLevelUp();
+        
+        // Chance to drop item
+        if (Math.random() < 0.3) {
+            const itemKeys = Object.keys(GAME_DATA.items);
+            const randomItem = itemKeys[Math.floor(Math.random() * itemKeys.length)];
+            const item = { ...GAME_DATA.items[randomItem], id: randomItem };
+            
+            const emptySlot = gameState.player.inventory.findIndex(slot => slot === null);
+            if (emptySlot !== -1) {
+                gameState.player.inventory[emptySlot] = item;
+                showLootPopup([item]);
+            }
+        }
+
+        // Death particles
+        createParticles(enemy.x, enemy.y, enemy.color, 15);
+    }
+
+    function checkLevelUp() {
+        while (gameState.player.xp >= gameState.player.xpToLevel) {
+            gameState.player.xp -= gameState.player.xpToLevel;
+            gameState.player.level++;
+            gameState.player.xpToLevel = Math.floor(100 * Math.pow(1.2, gameState.player.level));
+            
+            // Stat increases
+            gameState.player.maxHp += 20;
+            gameState.player.maxMp += 10;
+            gameState.player.hp = gameState.player.maxHp;
+            gameState.player.mp = gameState.player.maxMp;
+            gameState.player.ad += 2;
+            gameState.player.ap += 1;
+            
+            showNotification(`🎉 SEVİYE ${gameState.player.level}!`, 'levelup');
+            showAreaName(`Seviye ${gameState.player.level}`);
+        }
+    }
+
+    function playerDeath() {
+        gameState.player.level = Math.max(1, gameState.player.level - 1);
+        gameState.player.xp = 0;
+        gameState.player.gold = Math.floor(gameState.player.gold * 0.5);
+        gameState.player.hp = gameState.player.maxHp * 0.5;
+        document.getElementById('deathScreen').classList.add('open');
+        gameState.paused = true;
+    }
+
+    function respawn() {
+        document.getElementById('deathScreen').classList.remove('open');
+        gameState.player.x = 400;
+        gameState.player.y = 400;
+        gameState.paused = false;
+    }
+
+    // ==================== DAMAGE NUMBERS ====================
+    function showDamageNumber(x, y, damage, crit = false, type = 'normal') {
+        const elem = document.createElement('div');
+        elem.className = `damage-number ${crit ? 'crit' : type}`;
+        elem.textContent = (type === 'heal' ? '+' : '-') + damage;
+        elem.style.left = (x - gameState.camera.x + 30) + 'px';
+        elem.style.top = (y - gameState.camera.y) + 'px';
+        document.body.appendChild(elem);
+        
+        setTimeout(() => elem.remove(), 1000);
+    }
+
+    // ==================== NOTIFICATIONS ====================
+    function showNotification(text, type = 'info') {
+        const notif = document.createElement('div');
+        notif.className = `notification ${type}`;
+        notif.textContent = text;
+        document.body.appendChild(notif);
+        
+        setTimeout(() => notif.remove(), 3000);
+    }
+
+    function showAreaName(name) {
+        const elem = document.getElementById('areaName');
+        elem.textContent = name;
+        elem.classList.remove('show');
+        void elem.offsetWidth; // Trigger reflow
+        elem.classList.add('show');
+    }
+
+    function showLootPopup(items) {
+        const popup = document.getElementById('lootPopup');
+        const itemsContainer = document.getElementById('lootItems');
+        
+        itemsContainer.innerHTML = items.map(item => `
+            <div class="loot-item">
+                <div class="loot-item-icon">${item.icon}</div>
+                <div class="loot-item-name">${item.name}</div>
+            </div>
+        `).join('');
+        
+        popup.classList.add('open');
+        
+        if (gameState.lootTimeout) clearTimeout(gameState.lootTimeout);
+        gameState.lootTimeout = setTimeout(() => {
+            popup.classList.remove('open');
+        }, 3000);
+    }
+
+    // ==================== AREA TRANSITIONS ====================
+    function checkAreaTransitions() {
+        const player = gameState.player;
+        let newArea = null;
+
+        // Define area boundaries (simplified)
+        if (player.x > 750 && player.y > 300 && player.y < 500) {
+            // Enter dungeon
+            if (gameState.currentArea === 'village') newArea = 'dungeon_entrance';
+        } else if (player.x < 100 && gameState.currentArea === 'dungeon_entrance') {
+            newArea = 'village';
+        } else if (player.x > 750 && gameState.currentArea === 'village') {
+            newArea = 'forest';
+        } else if (player.x < 100 && gameState.currentArea === 'forest') {
+            newArea = 'village';
+        }
+
+        if (newArea && newArea !== gameState.currentArea) {
+            gameState.currentArea = newArea;
+            spawnEnemies();
+            showAreaName(GAME_DATA.areas[newArea].name);
+        }
+    }
+
+    // ==================== UI ====================
+    function updateHUD() {
+        const p = gameState.player;
+        
+        document.getElementById('healthBar').style.width = (p.hp / p.maxHp * 100) + '%';
+        document.getElementById('manaBar').style.width = (p.mp / p.maxMp * 100) + '%';
+        document.getElementById('xpBar').style.width = (p.xp / p.xpToLevel * 100) + '%';
+        
+        document.getElementById('healthText').textContent = `${Math.floor(p.hp)}/${p.maxHp}`;
+        document.getElementById('manaText').textContent = `${Math.floor(p.mp)}/${p.maxMp}`;
+        document.getElementById('xpText').textContent = `${p.xp}/${p.xpToLevel}`;
+        
+        document.getElementById('playerLevel').textContent = `SEVİYE ${p.level}`;
+        document.getElementById('playerClass').textContent = `${GAME_DATA.classes[p.class].name} • ${GAME_DATA.races[p.race].name}`;
+        document.getElementById('goldDisplay').textContent = `💰 ${p.gold}`;
+
+        updateSkillCooldownUI();
+    }
+
+    function toggleInventory() {
+        const panel = document.getElementById('inventoryPanel');
+        if (panel.classList.contains('open')) {
+            panel.classList.remove('open');
+            gameState.paused = false;
+        } else {
+            panel.classList.add('open');
+            gameState.paused = true;
+            showInventoryTab('inventory');
+        }
+    }
+
+    function showInventoryTab(tab) {
+        document.querySelectorAll('.inv-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+
+        document.getElementById('invInventory').style.display = tab === 'inventory' ? 'grid' : 'none';
+        document.getElementById('invEquipment').style.display = tab === 'equipment' ? 'flex' : 'none';
+        document.getElementById('invStats').style.display = tab === 'stats' ? 'block' : 'none';
+
+        if (tab === 'inventory') {
+            renderInventory();
+        } else if (tab === 'equipment') {
+            renderEquipment();
+        } else if (tab === 'stats') {
+            renderStats();
+        }
+    }
+
+    function renderInventory() {
+        const grid = document.getElementById('invInventory');
+        grid.innerHTML = gameState.player.inventory.map((slot, i) => {
+            if (slot) {
+                return `<div class="inv-slot" onclick="useItem(${i})" title="${slot.name}">
+                    ${slot.icon}
+                    ${slot.count > 1 ? `<span class="item-count">${slot.count}</span>` : ''}
+                </div>`;
+            }
+            return '<div class="inv-slot"></div>';
+        }).join('');
+    }
+
+    function renderEquipment() {
+        const section = document.getElementById('invEquipment');
+        const slots = ['head', 'body', 'feet', 'weapon', 'ring'];
+        const icons = ['⛑️', '🦺', '👢', '⚔️', '💍'];
+        
+        section.innerHTML = `
+            <div class="equip-slots">
+                ${slots.map((slot, i) => {
+                    const item = gameState.player.equipment[slot];
+                    return `<div class="equip-slot ${item ? 'equipped' : ''}" onclick="unequipItem('${slot}')">
+                        <span class="slot-icon">${item ? item.icon : icons[i]}</span>
+                        ${slot}
+                    </div>`;
+                }).join('')}
+            </div>
+            <div class="player-stats">
+                <h4 style="color: #ffd700; margin-bottom: 10px;">Karakter İstatistikleri</h4>
+                <div class="stat-row"><span class="stat-name">Güç</span><span class="stat-value">${gameState.player.str}</span></div>
+                <div class="stat-row"><span class="stat-name">Çeviklik</span><span class="stat-value">${gameState.player.dex}</span></div>
+                <div class="stat-row"><span class="stat-name">Zeka</span><span class="stat-value">${gameState.player.int}</span></div>
+                <div class="stat-row"><span class="stat-name">Dayanıklılık</span><span class="stat-value">${gameState.player.vit}</span></div>
+                <hr style="border-color: #333; margin: 10px 0;">
+                <div class="stat-row"><span class="stat-name">Saldırı Gücü</span><span class="stat-value">${gameState.player.ad}</span></div>
+                <div class="stat-row"><span class="stat-name">Büyü Gücü</span><span class="stat-value">${gameState.player.ap}</span></div>
+                <div class="stat-row"><span class="stat-name">Crit Şansı</span><span class="stat-value">${gameState.player.crit.toFixed(1)}%</span></div>
+            </div>
+        `;
+    }
+
+    function renderStats() {
+        const stats = document.getElementById('invStats');
+        const p = gameState.player;
+        stats.innerHTML = `
+            <h4 style="color: #ffd700; margin-bottom: 15px;">📊 Detaylı İstatistikler</h4>
+            <div class="stat-row"><span class="stat-name">Seviye</span><span class="stat-value">${p.level}</span></div>
+            <div class="stat-row"><span class="stat-name">XP</span><span class="stat-value">${p.xp}/${p.xpToLevel}</span></div>
+            <div class="stat-row"><span class="stat-name">Can</span><span class="stat-value">${p.hp}/${p.maxHp}</span></div>
+            <div class="stat-row"><span class="stat-name">Mana</span><span class="stat-value">${p.mp}/${p.maxMp}</span></div>
+            <div class="stat-row"><span class="stat-name">Altın</span><span class="stat-value">${p.gold}</span></div>
+            <hr style="border-color: #333; margin: 15px 0;">
+            <div class="stat-row"><span class="stat-name">Saldırı Hasarı</span><span class="stat-value">${p.ad}</span></div>
+            <div class="stat-row"><span class="stat-name">Büyü Hasarı</span><span class="stat-value">${p.ap}</span></div>
+            <div class="stat-row"><span class="stat-name">Hareket Hızı</span><span class="stat-value">${p.speed.toFixed(1)}</span></div>
+            <div class="stat-row"><span class="stat-name">Crit Oranı</span><span class="stat-value">${p.crit.toFixed(1)}%</span></div>
+            <div class="stat-row"><span class="stat-name">Defans</span><span class="stat-value">${p.vit * 2}</span></div>
+        `;
+    }
+
+    function useItem(index) {
+        const item = gameState.player.inventory[index];
+        if (!item) return;
+
+        if (item.type === 'consumable') {
+            if (item.hp) {
+                gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + item.hp);
+            }
+            if (item.mp) {
+                gameState.player.mp = Math.min(gameState.player.maxMp, gameState.player.mp + item.mp);
+            }
+            
+            item.count--;
+            if (item.count <= 0) {
+                gameState.player.inventory[index] = null;
+            }
+            
+            renderInventory();
+            showNotification(`${item.name} kullanıldı!`, 'item');
+        } else if (item.slot) {
+            // Equip item
+            const oldItem = gameState.player.equipment[item.slot];
+            gameState.player.equipment[item.slot] = item;
+            gameState.player.inventory[index] = oldItem;
+            applyEquipmentBonuses();
+            renderInventory();
+            renderEquipment();
+            showNotification(`${item.name} giyildi!`, 'item');
+        }
+    }
+
+    function unequipItem(slot) {
+        const item = gameState.player.equipment[slot];
+        if (!item) return;
+
+        const emptySlot = gameState.player.inventory.findIndex(s => s === null);
+        if (emptySlot !== -1) {
+            gameState.player.equipment[slot] = null;
+            gameState.player.inventory[emptySlot] = item;
+            applyEquipmentBonuses();
+            renderInventory();
+            renderEquipment();
+            showNotification(`${item.name} çıkarıldı!`, 'item');
+        }
+    }
+
+    function getWeaponDamage() {
+        const weapon = gameState.player.equipment.weapon;
+        return weapon ? (weapon.ad || 0) : 0;
+    }
+
+    function applyEquipmentBonuses() {
+        const p = gameState.player;
+        const classData = GAME_DATA.classes[p.class];
+        
+        p.maxHp = classData.baseHP + (p.vit * 10);
+        p.maxMp = classData.baseMP + (p.int * 3);
+        p.ad = classData.baseAD + (p.str * 2);
+        p.ap = classData.baseAP + (p.int * 2);
+
+        Object.values(p.equipment).forEach(item => {
+            if (item) {
+                if (item.hp) p.maxHp += item.hp;
+                if (item.mp) p.maxMp += item.mp;
+                if (item.ad) p.ad += item.ad;
+                if (item.ap) p.ap += item.ap;
+                if (item.int) p.int += item.int;
+                if (item.dex) p.dex += item.dex;
+            }
+        });
+    }
+
+    // ==================== NPC DIALOG ====================
+    function openDialog(npc) {
+        const panel = document.getElementById('dialogPanel');
+        const dialog = npc.dialog[0];
+        
+        document.getElementById('npcName').textContent = `${npc.icon} ${npc.name}`;
+        document.getElementById('dialogText').textContent = dialog.text;
+        
+        document.getElementById('dialogOptions').innerHTML = dialog.options.map(opt => 
+            `<button class="dialog-btn" onclick="handleDialogAction('${opt.action}', '${npc.id}')">${opt.text}</button>`
+        ).join('');
+        
+        panel.classList.add('open');
+        gameState.paused = true;
+    }
+
+    function handleDialogAction(action, npcId) {
+        switch (action) {
+            case 'shop':
+                closeDialog();
+                openShop();
+                break;
+            case 'heal':
+                if (gameState.player.gold >= 20) {
+                    gameState.player.gold -= 20;
+                    gameState.player.hp = gameState.player.maxHp;
+                    gameState.player.mp = gameState.player.maxMp;
+                    showNotification('Tamamen iyileştirildin!', 'heal');
+                } else {
+                    showNotification('Yeterli altın yok!', 'error');
+                }
+                closeDialog();
+                break;
+            case 'guildwar':
+                showNotification('Lonca savaşları yakında!', 'info');
+                closeDialog();
+                break;
+            default:
+                closeDialog();
+        }
+    }
+
+    function closeDialog() {
+        document.getElementById('dialogPanel').classList.remove('open');
+        gameState.paused = false;
+    }
+
+    // ==================== SHOP ====================
+    function openShop() {
+        const panel = document.getElementById('shopPanel');
+        const grid = document.getElementById('shopGrid');
+        
+        const shopItems = [
+            GAME_DATA.items.potion_health,
+            GAME_DATA.items.potion_mana,
+            GAME_DATA.items.sword,
+            GAME_DATA.items.staff,
+            GAME_DATA.items.helmet,
+            GAME_DATA.items.armor,
+            GAME_DATA.items.boots,
+            GAME_DATA.items.ring
+        ];
+        
+        grid.innerHTML = shopItems.map((item, i) => `
+            <div class="shop-item" onclick="buyItem(${i})">
+                <div class="shop-item-icon">${item.icon}</div>
+                <div class="shop-item-name">${item.name}</div>
+                <div class="shop-item-price">💰 ${item.slot ? (item.ad || item.ap || item.hp || 20) * 5 : 10}</div>
+                ${item.ad ? `<div class="shop-item-stat">+${item.ad} Saldırı</div>` : ''}
+                ${item.hp ? `<div class="shop-item-stat">+${item.hp} Can</div>` : ''}
+            </div>
+        `).join('');
+        
+        panel.classList.add('open');
+    }
+
+    function buyItem(index) {
+        const shopItems = [
+            GAME_DATA.items.potion_health,
+            GAME_DATA.items.potion_mana,
+            GAME_DATA.items.sword,
+            GAME_DATA.items.staff,
+            GAME_DATA.items.helmet,
+            GAME_DATA.items.armor,
+            GAME_DATA.items.boots,
+            GAME_DATA.items.ring
+        ];
+        
+        const prices = [10, 10, 50, 60, 40, 80, 30, 25];
+        const price = prices[index];
+        
+        if (gameState.player.gold >= price) {
+            const emptySlot = gameState.player.inventory.findIndex(s => s === null);
+            if (emptySlot !== -1) {
+                gameState.player.gold -= price;
+                gameState.player.inventory[emptySlot] = { ...shopItems[index] };
+                showNotification(`${shopItems[index].name} satın alındı!`, 'item');
+                updateHUD();
+            } else {
+                showNotification('Envanter dolu!', 'error');
+            }
+        } else {
+            showNotification('Yeterli altın yok!', 'error');
+        }
+    }
+
+    function closeShop() {
+        document.getElementById('shopPanel').classList.remove('open');
+    }
+
+    // ==================== MINIMAP ====================
+    function updateMinimap() {
+        minimapCtx.fillStyle = GAME_DATA.areas[gameState.currentArea].color;
+        minimapCtx.fillRect(0, 0, 150, 150);
+        
+        // Grid
+        minimapCtx.strokeStyle = 'rgba(255,255,255,0.1)';
+        minimapCtx.strokeRect(0, 0, 150, 150);
+        
+        // Enemies
+        gameState.enemies.forEach(enemy => {
+            minimapCtx.fillStyle = '#e74c3c';
+            minimapCtx.beginPath();
+            minimapCtx.arc(
+                (enemy.x / 900) * 150,
+                (enemy.y / 700) * 150,
+                2, 0, Math.PI * 2
+            );
+            minimapCtx.fill();
+        });
+        
+        // NPCs
+        gameState.npcs.forEach(npc => {
+            minimapCtx.fillStyle = '#ffd700';
+            minimapCtx.beginPath();
+            minimapCtx.arc(
+                (npc.x / 900) * 150,
+                (npc.y / 700) * 150,
+                3, 0, Math.PI * 2
+            );
+            minimapCtx.fill();
+        });
+        
+        // Player
+        minimapCtx.fillStyle = '#4a90d9';
+        minimapCtx.beginPath();
+        minimapCtx.arc(
+            (gameState.player.x / 900) * 150,
+            (gameState.player.y / 700) * 150,
+            4, 0, Math.PI * 2
+        );
+        minimapCtx.fill();
+    }
+
+    // ==================== PAUSE / SAVE ====================
+    function pauseGame() {
+        gameState.paused = true;
+        document.getElementById('pauseMenu').classList.add('open');
+    }
+
+    function resumeGame() {
+        gameState.paused = false;
+        document.getElementById('pauseMenu').classList.remove('open');
+        document.getElementById('inventoryPanel').classList.remove('open');
+        document.getElementById('dialogPanel').classList.remove('open');
+        document.getElementById('shopPanel').classList.remove('open');
+    }
+
+    function saveGame() {
+        const saveData = {
+            player: gameState.player,
+            currentArea: gameState.currentArea,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('medievalRealmSave', JSON.stringify(saveData));
+        showNotification('Oyun kaydedildi!', 'info');
+    }
+
+    function quitToMenu() {
+        cancelAnimationFrame(animationFrame);
+        document.getElementById('pauseMenu').classList.remove('open');
+        document.getElementById('deathScreen').classList.remove('open');
+        showScreen('mainMenu');
+        checkSavedGame();
+    }
+
+    // ==================== RENDERING ====================
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        if (gameState.screen !== 'gameScreen' || !gameState.player) return;
+
+        ctx.save();
+        ctx.translate(-gameState.camera.x, -gameState.camera.y);
+
+        // Draw ground
+        drawGround();
+        
+        // Draw grid/tiles effect
+        drawTiles();
+        
+        // Draw items on ground
+        drawGroundItems();
+        
+        // Draw NPCs
+        gameState.npcs.forEach(drawNPC);
+        
+        // Draw enemies
+        gameState.enemies.forEach(drawEnemy);
+        
+        // Draw player
+        drawPlayer();
+        
+        // Draw projectiles
+        gameState.projectiles.forEach(drawProjectile);
+        
+        // Draw particles
+        gameState.particles.forEach(drawParticle);
+        
+        // Draw area boundaries
+        drawAreaBoundaries();
+
+        ctx.restore();
+    }
+
+    function drawGround() {
+        const area = GAME_DATA.areas[gameState.currentArea];
+        ctx.fillStyle = area.color;
+        ctx.fillRect(0, 0, 900, 700);
+        
+        // Safe zone indicator in village
+        if (area.safe) {
+            ctx.fillStyle = 'rgba(74, 144, 217, 0.1)';
+            ctx.fillRect(300, 300, 200, 200);
+            ctx.strokeStyle = 'rgba(74, 144, 217, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(300, 300, 200, 200);
+        }
+    }
+
+    function drawTiles() {
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.lineWidth = 1;
+        
+        for (let x = 0; x < 900; x += 50) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, 700);
+            ctx.stroke();
+        }
+        
+        for (let y = 0; y < 700; y += 50) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(900, y);
+            ctx.stroke();
+        }
+    }
+
+    function drawAreaBoundaries() {
+        // Draw transition zones
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.2)';
+        
+        // Village exits
+        if (gameState.currentArea === 'village') {
+            ctx.fillRect(750, 300, 50, 200);
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#fff';
+            ctx.fillText('→ ORMAN', 760, 400);
+            ctx.fillText('→ ZİNDAN', 800, 400);
+        } else if (gameState.currentArea === 'forest') {
+            ctx.fillRect(0, 0, 50, 700);
+            ctx.fillStyle = '#fff';
+            ctx.fillText('KÖY ←', 10, 350);
+        }
+    }
+
+    function drawPlayer() {
+        const p = gameState.player;
+        
+        // Shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y + 20, 20, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Body
+        const classColors = {
+            warrior: '#c0392b',
+            mage: '#8e44ad',
+            rogue: '#2ecc71',
+            paladin: '#f1c40f'
+        };
+        
+        ctx.fillStyle = classColors[p.class];
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 20, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Inner
+        ctx.fillStyle = GAME_DATA.races[p.race].color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y - 5, 12, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Class icon
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.fillText(GAME_DATA.classes[p.class].icon, p.x, p.y + 5);
+        
+        // Name
+        ctx.font = '10px "Press Start 2P"';
+        ctx.fillStyle = '#ffd700';
+        ctx.fillText(p.name, p.x, p.y - 30);
+        
+        // Level
+        ctx.font = '8px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(`Lv.${p.level}`, p.x, p.y - 42);
+    }
+
+    function drawEnemy(enemy) {
+        // Shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.beginPath();
+        ctx.ellipse(enemy.x, enemy.y + 20, 18, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Body
+        ctx.fillStyle = enemy.color;
+        ctx.beginPath();
+        ctx.arc(enemy.x, enemy.y, 18, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Icon
+        ctx.font = '20px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(enemy.icon, enemy.x, enemy.y + 7);
+        
+        // HP bar
+        const hpPercent = enemy.currentHp / enemy.hp;
+        ctx.fillStyle = '#333';
+        ctx.fillRect(enemy.x - 20, enemy.y - 35, 40, 5);
+        ctx.fillStyle = hpPercent > 0.5 ? '#4caf50' : hpPercent > 0.25 ? '#ff9800' : '#f44336';
+        ctx.fillRect(enemy.x - 20, enemy.y - 35, 40 * hpPercent, 5);
+        
+        // Name
+        ctx.font = '8px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(enemy.name, enemy.x, enemy.y - 40);
+    }
+
+    function drawNPC(npc) {
+        // Shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.beginPath();
+        ctx.ellipse(npc.x, npc.y + 20, 20, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Body
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath();
+        ctx.arc(npc.x, npc.y, 22, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Inner
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(npc.x, npc.y - 5, 14, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Icon
+        ctx.font = '18px Arial';
+        ctx.fillText(npc.icon, npc.x, npc.y + 6);
+        
+        // Name
+        ctx.font = '8px "Press Start 2P"';
+        ctx.fillStyle = '#ffd700';
+        ctx.textAlign = 'center';
+        ctx.fillText(npc.name, npc.x, npc.y - 32);
+        
+        // Interaction indicator
+        const dist = Math.hypot(npc.x - gameState.player.x, npc.y - gameState.player.y);
+        if (dist < 60) {
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#4a90d9';
+            ctx.fillText('Tıkla!', npc.x, npc.y + 35);
+        }
+    }
+
+    function drawProjectile(proj) {
+        ctx.fillStyle = proj.color || '#ffd700';
+        ctx.beginPath();
+        ctx.arc(proj.x, proj.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Trail
+        ctx.strokeStyle = proj.color || '#ffd700';
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(proj.x, proj.y);
+        ctx.lineTo(proj.x - proj.vx * 20, proj.y - proj.vy * 20);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+    }
+
+    function drawParticle(particle) {
+        ctx.globalAlpha = particle.alpha;
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+    }
+
+    function drawGroundItems() {
+        // Future: dropped items
+    }
+
+    // Initialize game
+    init();
+    </script>
+</body>
+</html>
