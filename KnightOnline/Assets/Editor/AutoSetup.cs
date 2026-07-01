@@ -42,7 +42,6 @@ namespace KnightOnline
             SetupGround();
             SetupPlayer();
             SetupMonsters();
-            SetupUI();
             
             Selection.activeGameObject = GameObject.Find("Player");
             EditorUtility.DisplayDialog("Tamamlandı!", "Oyun kuruldu! Play moduna geçin.", "Tamam");
@@ -61,7 +60,7 @@ namespace KnightOnline
             
             cam.transform.position = new Vector3(0, 0, -10);
             cam.orthographic = true;
-            cam.orthographicSize = 5;
+            cam.orthographicSize = 8;
             cam.backgroundColor = new Color(0.5f, 0.7f, 1f);
             
             Debug.Log("✅ Kamera kuruldu (Orthographic)");
@@ -84,28 +83,10 @@ namespace KnightOnline
             // Arkaplan
             GameObject bg = new GameObject("Background");
             SpriteRenderer bgSr = bg.AddComponent<SpriteRenderer>();
-            bgSr.sprite = Sprite.Create(
-                Texture2D.whiteTexture,
-                new Rect(0, 0, 1, 1),
-                new Vector2(0.5f, 0.5f)
-            );
-            bgSr.color = new Color(0.4f, 0.6f, 0.4f);
-            bg.transform.localScale = new Vector3(50, 50, 1);
+            bgSr.sprite = CreateColoredSprite(new Color(0.4f, 0.6f, 0.4f));
+            bg.transform.localScale = new Vector3(100, 100, 1);
             bg.transform.position = Vector3.zero;
             bgSr.sortingOrder = -100;
-            
-            // Zemin çizgisi
-            GameObject ground = new GameObject("Ground");
-            SpriteRenderer sr = ground.AddComponent<SpriteRenderer>();
-            sr.sprite = Sprite.Create(
-                Texture2D.whiteTexture,
-                new Rect(0, 0, 1, 1),
-                new Vector2(0.5f, 0.5f)
-            );
-            sr.color = new Color(0.3f, 0.5f, 0.2f);
-            ground.transform.localScale = new Vector3(50, 1, 1);
-            ground.transform.position = new Vector3(0, -3, 0);
-            sr.sortingOrder = -50;
             
             Debug.Log("✅ Zemin kuruldu");
         }
@@ -141,10 +122,10 @@ namespace KnightOnline
         
         void SetupMonsters()
         {
-            CreateMonster("Goblin", new Vector3(5, 0, 0), Color.green, 80, 10);
-            CreateMonster("Orc", new Vector3(-5, 0, 0), new Color(0.4f, 0.6f, 0.3f), 100, 15);
-            CreateMonster("Skeleton", new Vector3(8, 0, 0), Color.white, 60, 8);
-            CreateMonster("Dragon", new Vector3(0, 5, 0), Color.red, 300, 30);
+            CreateMonster("Goblin", new Vector3(8, 0, 0), Color.green, 80, 10);
+            CreateMonster("Orc", new Vector3(-8, 0, 0), new Color(0.4f, 0.6f, 0.3f), 100, 15);
+            CreateMonster("Skeleton", new Vector3(12, 0, 0), Color.white, 60, 8);
+            CreateMonster("Dragon", new Vector3(0, 8, 0), Color.red, 300, 30);
         }
         
         void CreateMonster(string name, Vector3 pos, Color color, int health, int damage)
@@ -172,165 +153,6 @@ namespace KnightOnline
             Debug.Log($"✅ {name} (Can: {health})");
         }
         
-        void SetupUI()
-        {
-            // Canvas
-            GameObject canvasGo = new GameObject("Canvas");
-            Canvas canvas = canvasGo.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvasGo.AddComponent<UnityEngine.UI.CanvasScaler>();
-            canvasGo.AddComponent<UnityEngine.UI.GraphicRaycaster>();
-            
-            // Health Bar Panel
-            CreateHealthBar(canvasGo.transform);
-            
-            // Mana Bar Panel
-            CreateManaBar(canvasGo.transform);
-            
-            // Skill Bar
-            CreateSkillBar(canvasGo.transform);
-            
-            Debug.Log("✅ UI kuruldu");
-        }
-        
-        void CreateHealthBar(Transform parent)
-        {
-            GameObject panel = new GameObject("HealthBarPanel");
-            panel.transform.parent = parent;
-            RectTransform rt = panel.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0, 1);
-            rt.anchorMax = new Vector2(0, 1);
-            rt.pivot = new Vector2(0, 1);
-            rt.anchoredPosition = new Vector2(20, -20);
-            rt.sizeDelta = new Vector2(250, 30);
-            
-            // Background
-            GameObject bg = new GameObject("Background");
-            bg.transform.parent = panel.transform;
-            Image bgImg = bg.AddComponent<Image>();
-            bgImg.color = Color.black;
-            RectTransform bgRT = bg.GetComponent<RectTransform>();
-            bgRT.anchorMin = Vector2.zero;
-            bgRT.anchorMax = Vector2.one;
-            bgRT.sizeDelta = Vector2.zero;
-            
-            // Fill
-            GameObject fill = new GameObject("Fill");
-            fill.transform.parent = panel.transform;
-            Image fillImg = fill.AddComponent<Image>();
-            fillImg.color = Color.red;
-            RectTransform fillRT = fill.GetComponent<RectTransform>();
-            fillRT.anchorMin = Vector2.zero;
-            fillRT.anchorMax = new Vector2(1, 1);
-            fillRT.sizeDelta = new Vector2(-4, -4);
-            fillRT.anchoredPosition = Vector2.zero;
-            
-            // Text
-            GameObject textGo = new GameObject("Text");
-            textGo.transform.parent = panel.transform;
-            textGo.AddComponent<TextMeshProUGUI>().text = "100/100";
-            TextMeshProUGUI txt = textGo.GetComponent<TextMeshProUGUI>();
-            txt.alignment = TextAlignmentOptions.Center;
-            txt.color = Color.white;
-            RectTransform txtRT = textGo.GetComponent<RectTransform>();
-            txtRT.anchorMin = Vector2.zero;
-            txtRT.anchorMax = Vector2.one;
-            txtRT.sizeDelta = Vector2.zero;
-        }
-        
-        void CreateManaBar(Transform parent)
-        {
-            GameObject panel = new GameObject("ManaBarPanel");
-            panel.transform.parent = parent;
-            RectTransform rt = panel.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0, 1);
-            rt.anchorMax = new Vector2(0, 1);
-            rt.pivot = new Vector2(0, 1);
-            rt.anchoredPosition = new Vector2(20, -60);
-            rt.sizeDelta = new Vector2(250, 20);
-            
-            // Background
-            GameObject bg = new GameObject("Background");
-            bg.transform.parent = panel.transform;
-            Image bgImg = bg.AddComponent<Image>();
-            bgImg.color = new Color(0, 0, 0, 0.5f);
-            RectTransform bgRT = bg.GetComponent<RectTransform>();
-            bgRT.anchorMin = Vector2.zero;
-            bgRT.anchorMax = Vector2.one;
-            bgRT.sizeDelta = Vector2.zero;
-            
-            // Fill
-            GameObject fill = new GameObject("Fill");
-            fill.transform.parent = panel.transform;
-            Image fillImg = fill.AddComponent<Image>();
-            fillImg.color = Color.blue;
-            RectTransform fillRT = fill.GetComponent<RectTransform>();
-            fillRT.anchorMin = Vector2.zero;
-            fillRT.anchorMax = new Vector2(1, 1);
-            fillRT.sizeDelta = new Vector2(-4, -4);
-            fillRT.anchoredPosition = Vector2.zero;
-            
-            // Text
-            GameObject textGo = new GameObject("Text");
-            textGo.transform.parent = panel.transform;
-            textGo.AddComponent<TextMeshProUGUI>().text = "100/100";
-            TextMeshProUGUI txt = textGo.GetComponent<TextMeshProUGUI>();
-            txt.alignment = TextAlignmentOptions.Center;
-            txt.color = Color.white;
-            RectTransform txtRT = textGo.GetComponent<RectTransform>();
-            txtRT.anchorMin = Vector2.zero;
-            txtRT.anchorMax = Vector2.one;
-            txtRT.sizeDelta = Vector2.zero;
-        }
-        
-        void CreateSkillBar(Transform parent)
-        {
-            GameObject panel = new GameObject("SkillBarPanel");
-            panel.transform.parent = parent;
-            RectTransform rt = panel.AddComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0);
-            rt.anchorMax = new Vector2(0.5f, 0);
-            rt.pivot = new Vector2(0.5f, 0);
-            rt.anchoredPosition = new Vector2(0, 20);
-            rt.sizeDelta = new Vector2(350, 60);
-            
-            // 5 skill slot oluştur
-            for (int i = 0; i < 5; i++)
-            {
-                GameObject slot = new GameObject($"Skill{i + 1}");
-                slot.transform.parent = panel.transform;
-                RectTransform slotRT = slot.AddComponent<RectTransform>();
-                slotRT.anchorMin = new Vector2(0, 0);
-                slotRT.anchorMax = new Vector2(0, 0);
-                slotRT.pivot = new Vector2(0, 0);
-                slotRT.anchoredPosition = new Vector2(i * 70, 0);
-                slotRT.sizeDelta = new Vector2(60, 60);
-                
-                // Background
-                GameObject bg = new GameObject("BG");
-                bg.transform.parent = slot.transform;
-                Image bgImg = bg.AddComponent<Image>();
-                bgImg.color = new Color(0.2f, 0.2f, 0.2f);
-                RectTransform bgRT = bg.GetComponent<RectTransform>();
-                bgRT.anchorMin = Vector2.zero;
-                bgRT.anchorMax = Vector2.one;
-                bgRT.sizeDelta = Vector2.zero;
-                
-                // Hotkey text
-                GameObject keyText = new GameObject("Hotkey");
-                keyText.transform.parent = slot.transform;
-                keyText.AddComponent<TextMeshProUGUI>().text = (i + 1).ToString();
-                TextMeshProUGUI keyTxt = keyText.GetComponent<TextMeshProUGUI>();
-                keyTxt.alignment = TextAlignmentOptions.BottomRight;
-                keyTxt.fontSize = 14;
-                keyTxt.color = Color.white;
-                RectTransform keyRT = keyText.GetComponent<RectTransform>();
-                keyRT.anchorMin = Vector2.zero;
-                keyRT.anchorMax = Vector2.one;
-                keyRT.sizeDelta = new Vector2(-5, -5);
-            }
-        }
-        
         Sprite CreateColoredSprite(Color color)
         {
             Texture2D tex = new Texture2D(64, 64);
@@ -345,7 +167,7 @@ namespace KnightOnline
         
         void ClearScene()
         {
-            string[] names = { "Player", "Goblin", "Orc", "Skeleton", "Dragon", "Ground", "Background", "Canvas", "Main Camera" };
+            string[] names = { "Player", "Goblin", "Orc", "Skeleton", "Dragon", "Ground", "Background", "Main Camera" };
             foreach (string n in names)
             {
                 GameObject go = GameObject.Find(n);
