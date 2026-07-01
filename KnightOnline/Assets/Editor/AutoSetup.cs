@@ -176,13 +176,20 @@ namespace KnightOnline
             groundMat.color = new Color(0.3f, 0.5f, 0.2f);
             ground.GetComponent<Renderer>().material = groundMat;
             
-            // NavMesh Agent bileşeni ile yüzey oluştur (NavMesh bake edilebilir)
-            GameObject navMeshSurface = new GameObject("NavMeshSurface");
-            UnityEngine.AI.NavMeshSurface surface = navMeshSurface.AddComponent<UnityEngine.AI.NavMeshSurface>();
-            surface.BuildNavMesh();
+            // NavMesh bake et
+            BakeNavMesh();
             
             // Enemy layer oluştur (yoksa)
             CreateEnemyLayer();
+        }
+        
+        void BakeNavMesh()
+        {
+            #if UNITY_EDITOR
+            // NavMesh build et
+            UnityEditor.AI.NavMeshBuilder.BuildNavMeshAsync();
+            Debug.Log("✅ NavMesh oluşturuldu!");
+            #endif
         }
         
         void CreateEnemyLayer()
