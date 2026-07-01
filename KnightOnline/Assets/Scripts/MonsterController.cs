@@ -222,6 +222,12 @@ namespace KnightOnline
         
         void StartPatrol()
         {
+            if (navMeshAgent == null || !navMeshAgent.isOnNavMesh || !navMeshAgent.isActiveAndEnabled)
+            {
+                StartIdle();
+                return;
+            }
+            
             ChangeState(MonsterState.Patrol);
             
             if (patrolPoints.Count > 0)
