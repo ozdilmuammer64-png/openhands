@@ -10,8 +10,6 @@ namespace KnightOnline
     
     public class MonsterController : MonoBehaviour, IDamageable
     {
-        [Header("Monster Info")]
-        
         void Awake()
         {
             // Nesneyi yukarı kaldır (yerden)
