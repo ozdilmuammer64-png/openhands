@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 
-namespace KnightOnline.Scripts
+namespace KnightOnline
 {
     public enum PlayerState { Idle, Walking, Running, Attacking, Casting, Dead }
     public enum PlayerClass { Warrior, Mage, Rogue, Priest }

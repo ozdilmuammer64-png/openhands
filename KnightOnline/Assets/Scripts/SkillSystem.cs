@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace KnightOnline.Scripts
+namespace KnightOnline
 {
     public enum SkillType { Passive, Active, Buff, Debuff }
     public enum SkillTarget { Self, SingleEnemy, MultipleEnemies, Area, Ally, SelfArea }

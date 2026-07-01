@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-namespace KnightOnline.Scripts
+namespace KnightOnline
 {
     [Serializable]
     public class GameSaveData

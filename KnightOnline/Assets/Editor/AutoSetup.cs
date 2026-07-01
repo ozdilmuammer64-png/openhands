@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.SceneManagement;
 
-namespace KnightOnline.Editor
+namespace KnightOnline
 {
     /// <summary>
     /// Knight Online - Tek tıkla sahne, obje, UI ve referansları kuran script

@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
-namespace KnightOnline.Scripts
+namespace KnightOnline
 {
     public class UIManager : MonoBehaviour
     {

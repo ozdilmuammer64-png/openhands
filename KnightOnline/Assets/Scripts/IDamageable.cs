@@ -1,4 +1,4 @@
-namespace KnightOnline.Scripts
+namespace KnightOnline
 {
     public interface IDamageable
     {

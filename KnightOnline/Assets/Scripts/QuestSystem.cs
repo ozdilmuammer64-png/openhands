@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace KnightOnline.Scripts
+namespace KnightOnline
 {
     public enum QuestType { Kill, Collect, Explore, Escort, Talk }
     public enum QuestDifficulty { Easy, Medium, Hard, Elite }

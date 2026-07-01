@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace KnightOnline.Scripts
+namespace KnightOnline
 {
     public enum ItemType { Weapon, Armor, Helmet, Shield, Boots, Gloves, Belt, Ring, Amulet, Potion, Scroll, Quest, Material, Gem }
     public enum ItemRarity { Common, Uncommon, Rare, Epic, Legendary }

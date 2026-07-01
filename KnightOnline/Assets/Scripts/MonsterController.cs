@@ -3,7 +3,7 @@ using UnityEngine.AI;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace KnightOnline.Scripts
+namespace KnightOnline
 {
     public enum MonsterType { Normal, Elite, Boss, Guardian }
     public enum MonsterState { Idle, Patrol, Chase, Attack, Hurt, Dead }

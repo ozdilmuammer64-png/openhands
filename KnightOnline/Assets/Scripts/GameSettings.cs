@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace KnightOnline.Scripts
+namespace KnightOnline
 {
     public class GameSettings : MonoBehaviour
     {

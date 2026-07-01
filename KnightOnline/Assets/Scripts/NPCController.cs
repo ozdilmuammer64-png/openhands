@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace KnightOnline.Scripts
+namespace KnightOnline
 {
     public enum NPCType { Merchant, QuestGiver, Trainer, Banker, Guard, Info, Boss }
     
