@@ -73,7 +73,7 @@ namespace KnightOnline
         private bool isGrounded;
         private bool isRunning;
         private bool isLocked;
-        private Transform lockedTarget;
+        public Transform lockedTarget;
         private bool isDead;
         
         // Mana regeneration
