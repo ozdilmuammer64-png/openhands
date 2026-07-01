@@ -104,9 +104,9 @@ namespace KnightOnline
         void SetupScene()
         {
             Scene scene = SceneManager.GetActiveScene();
-            if (scene.name == null || scene.name == "")
+            if (string.IsNullOrEmpty(scene.name))
             {
-                scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneGameMode.Single);
+                EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects);
             }
             
             // Sahneyi temizle
