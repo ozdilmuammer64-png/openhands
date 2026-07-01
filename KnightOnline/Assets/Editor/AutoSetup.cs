@@ -132,6 +132,16 @@ namespace KnightOnline
         {
             Debug.Log("🌍 Çevre kuruluyor...");
             
+            // Kamera oluştur (önce olmalı)
+            Camera mainCamera = Camera.main;
+            if (mainCamera == null)
+            {
+                GameObject camObj = new GameObject("Main Camera");
+                mainCamera = camObj.AddComponent<Camera>();
+                mainCamera.tag = "MainCamera";
+            }
+            mainCamera.backgroundColor = new Color(0.5f, 0.7f, 1f);
+            
             // Ana ışık
             GameObject lightObj = GameObject.Find("Directional Light");
             if (lightObj == null)
@@ -148,9 +158,6 @@ namespace KnightOnline
             // Ortam ışığı
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
             RenderSettings.ambientLight = new Color(0.4f, 0.45f, 0.55f);
-            
-            // Gökyüzü
-            Camera.main.backgroundColor = new Color(0.5f, 0.7f, 1f);
             
             // Zemin
             GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
