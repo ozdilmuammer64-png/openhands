@@ -264,7 +264,7 @@ namespace KnightOnline
             nameObj.transform.parent = healthBarCanvas.transform;
             UnityEngine.UI.Text nameText = nameObj.AddComponent<UnityEngine.UI.Text>();
             nameText.text = controller.playerName;
-            nameText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            nameText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             nameText.fontSize = 12;
             nameText.color = Color.white;
             nameText.alignment = TextAnchor.MiddleCenter;
@@ -399,7 +399,7 @@ namespace KnightOnline
             
             UnityEngine.UI.Text textComponent = textObj.AddComponent<UnityEngine.UI.Text>();
             textComponent.text = text;
-            textComponent.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            textComponent.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             textComponent.fontSize = fontSize;
             textComponent.fontStyle = fontStyle;
             textComponent.color = Color.white;
@@ -643,7 +643,7 @@ namespace KnightOnline
             nameObj.transform.parent = healthBarCanvas.transform;
             UnityEngine.UI.Text nameText = nameObj.AddComponent<UnityEngine.UI.Text>();
             nameText.text = monsterName;
-            nameText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            nameText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             nameText.fontSize = 12;
             nameText.color = Color.white;
             nameText.alignment = TextAnchor.MiddleCenter;
@@ -683,7 +683,7 @@ namespace KnightOnline
             
             UnityEngine.UI.Text text = nameTag.AddComponent<UnityEngine.UI.Text>();
             text.text = displayName;
-            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             text.fontSize = 14;
             text.fontStyle = FontStyle.Bold;
             text.color = color;
