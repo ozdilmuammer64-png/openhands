@@ -113,7 +113,7 @@ namespace KnightOnline
                 promptObj.transform.localPosition = Vector3.up * 2.5f;
                 
                 Canvas canvas = promptObj.AddComponent<Canvas>();
-                canvas.renderMode = RenderMode.WorldToScreenPoint;
+                canvas.renderMode = RenderMode.WorldSpace;
                 canvas.worldCamera = Camera.main;
                 
                 promptObj.AddComponent<UnityEngine.UI.CanvasScaler>();
