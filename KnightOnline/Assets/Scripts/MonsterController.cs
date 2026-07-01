@@ -200,7 +200,7 @@ namespace KnightOnline
         void HandleIdle()
         {
             stateTimer -= Time.deltaTime;
-            if (animator != null) animator.SetFloat("Speed", 0);
+            if (animator != null && animator.runtimeAnimatorController != null) animator.SetFloat("Speed", 0);
             
             if (stateTimer <= 0)
             {
@@ -255,6 +255,11 @@ namespace KnightOnline
             navMeshAgent.speed = patrolSpeed;
         }
         
+        bool HasAnimator()
+        {
+            return animator != null && animator.runtimeAnimatorController != null;
+        }
+        
         void HandlePatrol()
         {
             if (navMeshAgent == null || !navMeshAgent.isOnNavMesh || !navMeshAgent.isActiveAndEnabled)
@@ -269,7 +274,7 @@ namespace KnightOnline
                 return;
             }
             
-            if (animator != null) animator.SetFloat("Speed", navMeshAgent.velocity.magnitude);
+            if (HasAnimator()) animator.SetFloat("Speed", navMeshAgent.velocity.magnitude);
         }
         
         void HandleChase()
@@ -305,7 +310,7 @@ namespace KnightOnline
             navMeshAgent.speed = chaseSpeed;
             navMeshAgent.stoppingDistance = attackRange - 0.5f;
             
-            if (animator != null) animator.SetFloat("Speed", navMeshAgent.velocity.magnitude);
+            if (HasAnimator()) animator.SetFloat("Speed", navMeshAgent.velocity.magnitude);
             
             // Look at target
             Vector3 direction = target.position - transform.position;
@@ -348,7 +353,7 @@ namespace KnightOnline
                 );
             }
             
-            if (animator != null) animator.SetFloat("Speed", 0);
+            if (HasAnimator()) animator.SetFloat("Speed", 0);
             
             // Attack
             if (Time.time - lastAttackTime >= attackCooldown / attackSpeed)
@@ -359,7 +364,7 @@ namespace KnightOnline
         
         System.Collections.IEnumerator PerformAttack()
         {
-            if (animator != null) animator.SetTrigger("Attack");
+            if (HasAnimator()) animator.SetTrigger("Attack");
             lastAttackTime = Time.time;
             
             yield return new WaitForSeconds(0.3f);
@@ -396,7 +401,7 @@ namespace KnightOnline
             if (currentState != newState)
             {
                 currentState = newState;
-                if (animator != null) animator.SetInteger("State", (int)newState);
+                if (HasAnimator()) animator.SetInteger("State", (int)newState);
                 lastStateChangeTime = Time.time;
             }
         }
@@ -409,7 +414,7 @@ namespace KnightOnline
             currentHealth -= reducedDamage;
             currentHealth = Mathf.Max(0, currentHealth);
             
-            if (animator != null) animator.SetTrigger("Hurt");
+            if (HasAnimator()) animator.SetTrigger("Hurt");
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
             
             if (hitEffect != null)
@@ -441,7 +446,7 @@ namespace KnightOnline
         {
             isDead = true;
             ChangeState(MonsterState.Dead);
-            if (animator != null) animator.SetTrigger("Death");
+            if (HasAnimator()) animator.SetTrigger("Death");
             
             navMeshAgent.enabled = false;
             
