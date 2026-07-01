@@ -185,6 +185,7 @@ namespace KnightOnline
             GameObject playerObj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             playerObj.name = "Player";
             playerObj.tag = "Player";
+            playerObj.transform.position = new Vector3(0, 1, 0);
             
             // Oyuncu materyali
             Material playerMat = new Material(Shader.Find("Standard"));
@@ -588,16 +589,16 @@ namespace KnightOnline
             Debug.Log("📦 Örnek içerik oluşturuluyor...");
             
             // Canavarlar
-            CreateMonster("Goblin", new Vector3(10, 0, 5), Color.green);
-            CreateMonster("Orc", new Vector3(-10, 0, 5), new Color(0.4f, 0.6f, 0.3f));
-            CreateMonster("Skeleton", new Vector3(15, 0, -10), Color.white);
+            CreateMonster("Goblin", new Vector3(10, 1, 5), Color.green);
+            CreateMonster("Orc", new Vector3(-10, 1, 5), new Color(0.4f, 0.6f, 0.3f));
+            CreateMonster("Skeleton", new Vector3(15, 1, -10), Color.white);
             
             // Boss
-            CreateBoss("Dragon", new Vector3(0, 0, 30));
+            CreateBoss("Dragon", new Vector3(0, 1, 30));
             
             // NPC
-            CreateNPC("Merchant", "Tüccar", new Vector3(5, 0, -5), Color.yellow);
-            CreateNPC("QuestGiver", "Görevci", new Vector3(-5, 0, -5), Color.green);
+            CreateNPC("Merchant", "Tüccar", new Vector3(5, 1, -5), Color.yellow);
+            CreateNPC("QuestGiver", "Görevci", new Vector3(-5, 1, -5), Color.green);
             
             // Oyuncu altın
             PlayerController player = Object.FindObjectOfType<PlayerController>();

@@ -11,6 +11,16 @@ namespace KnightOnline
     public class MonsterController : MonoBehaviour, IDamageable
     {
         [Header("Monster Info")]
+        
+        void Awake()
+        {
+            // Nesneyi yukarı kaldır (yerden)
+            Vector3 pos = transform.position;
+            pos.y = 1f; // Yerden 1 birim yukarıda
+            transform.position = pos;
+        }
+        
+        [Header("Monster Info")]
         public string monsterName = "Goblin";
         public MonsterType monsterType = MonsterType.Normal;
         public int level = 1;
