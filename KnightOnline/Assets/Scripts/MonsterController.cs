@@ -243,9 +243,16 @@ namespace KnightOnline
         
         void HandlePatrol()
         {
+            if (navMeshAgent == null || !navMeshAgent.isOnNavMesh || !navMeshAgent.isActiveAndEnabled)
+            {
+                StartIdle();
+                return;
+            }
+            
             if (navMeshAgent.remainingDistance < 0.5f)
             {
                 StartIdle();
+                return;
             }
             
             animator.SetFloat("Speed", navMeshAgent.velocity.magnitude);
@@ -253,6 +260,12 @@ namespace KnightOnline
         
         void HandleChase()
         {
+            if (navMeshAgent == null || !navMeshAgent.isOnNavMesh || !navMeshAgent.isActiveAndEnabled)
+            {
+                StartIdle();
+                return;
+            }
+            
             if (target == null)
             {
                 StartIdle();
