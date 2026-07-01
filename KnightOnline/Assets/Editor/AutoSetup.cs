@@ -554,7 +554,7 @@ namespace KnightOnline
             Animator animator = monster.AddComponent<Animator>();
             controller.animator = animator;
             
-            CreateHealthBar(monster, controller);
+            CreateMonsterHealthBar(monster, controller.monsterName);
         }
         
         void CreateBoss(string name, Vector3 position)
@@ -584,9 +584,56 @@ namespace KnightOnline
             Animator animator = boss.AddComponent<Animator>();
             controller.animator = animator;
             
-            CreateHealthBar(boss, controller);
+            CreateMonsterHealthBar(boss, controller.monsterName);
             
             Debug.Log("🗡️ Boss oluşturuldu: " + name);
+        }
+        
+        void CreateMonsterHealthBar(GameObject parent, string monsterName)
+        {
+            GameObject healthBarCanvas = new GameObject("HealthBarCanvas");
+            healthBarCanvas.transform.parent = parent.transform;
+            healthBarCanvas.transform.localPosition = Vector3.up * 2.5f;
+            
+            Canvas canvas = healthBarCanvas.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvas.worldCamera = Camera.main;
+            
+            healthBarCanvas.AddComponent<UnityEngine.UI.CanvasScaler>();
+            healthBarCanvas.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+            
+            // Arka plan
+            GameObject bgObj = new GameObject("HealthBarBG");
+            bgObj.transform.parent = healthBarCanvas.transform;
+            UnityEngine.UI.Image bg = bgObj.AddComponent<UnityEngine.UI.Image>();
+            bg.color = new Color(0.2f, 0.2f, 0.2f);
+            RectTransform bgRect = bgObj.GetComponent<RectTransform>();
+            bgRect.sizeDelta = new Vector2(2, 0.2f);
+            bgRect.localPosition = Vector3.zero;
+            
+            // Sağlık barı
+            GameObject healthObj = new GameObject("HealthBar");
+            healthObj.transform.parent = healthBarCanvas.transform;
+            UnityEngine.UI.Image healthImg = healthObj.AddComponent<UnityEngine.UI.Image>();
+            healthImg.color = Color.red;
+            healthImg.type = UnityEngine.UI.Image.Type.Filled;
+            healthImg.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
+            RectTransform healthRect = healthObj.GetComponent<RectTransform>();
+            healthRect.sizeDelta = new Vector2(1.9f, 0.15f);
+            healthRect.localPosition = Vector3.zero;
+            
+            // İsim
+            GameObject nameObj = new GameObject("NameLabel");
+            nameObj.transform.parent = healthBarCanvas.transform;
+            UnityEngine.UI.Text nameText = nameObj.AddComponent<UnityEngine.UI.Text>();
+            nameText.text = monsterName;
+            nameText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            nameText.fontSize = 12;
+            nameText.color = Color.white;
+            nameText.alignment = TextAnchor.MiddleCenter;
+            RectTransform nameRect = nameObj.GetComponent<RectTransform>();
+            nameRect.sizeDelta = new Vector2(2, 0.3f);
+            nameRect.localPosition = new Vector3(0, 0.3f, 0);
         }
         
         void CreateNPC(string name, string displayName, Vector3 position, Color color)
