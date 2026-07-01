@@ -143,6 +143,13 @@ namespace KnightOnline
             }
             mainCamera.backgroundColor = new Color(0.5f, 0.7f, 1f);
             
+            // CameraFollow scripti ekle
+            CameraFollow camFollow = mainCamera.GetComponent<CameraFollow>();
+            if (camFollow == null)
+            {
+                mainCamera.gameObject.AddComponent<CameraFollow>();
+            }
+            
             // Ana ışık
             GameObject lightObj = GameObject.Find("Directional Light");
             if (lightObj == null)
